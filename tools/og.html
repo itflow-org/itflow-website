@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!--
+  The picture shown when a link to itflow.org is shared: assets/img/og.png, 1200 x 630.
+  To make it again (after a price change, say): open /tools/og.html on the site in a browser
+  window exactly 1200 x 630, in light mode, and save a screenshot of it as assets/img/og.png.
+-->
+<link rel="stylesheet" href="/assets/vendor/fontawesome/css/all.min.css"><link rel="stylesheet" href="/assets/css/site.css">
+<style>
+body { width: 1200px; height: 630px; overflow: hidden; margin: 0; }
+.og { position: relative; height: 630px; overflow: hidden; background: var(--paper); }
+.og .bar { height: 92px; padding: 0 64px; display: flex; align-items: center; background: var(--night); }
+.og .bar .logo { font-size: 2.2rem; }
+.og .text { padding: 46px 64px 0; }
+.og h1 { font-size: 2.75rem; font-weight: 800; line-height: 1.06; letter-spacing: -0.035em; max-width: 12ch; }
+.og p { margin-top: 18px; font-size: 1.25rem; color: var(--muted); max-width: 23ch; line-height: 1.45; }
+.og .band { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; background: var(--brand); }
+.og .screen { position: absolute; left: 560px; top: 150px; width: 840px; }
+</style></head><body>
+<div class="og">
+  <div class="bar"><span class="logo"><i class="fas fa-paper-plane logo-plane"></i><span class="logo-it">IT</span><span class="logo-flow">Flow</span></span></div>
+  <div class="text">
+    <h1>Client IT documentation, ticketing and billing</h1>
+    <p>Free and open source. Host it yourself, or let us host it from $60 a month.</p>
+  </div>
+  <div class="band"></div>
+  <div class="screen"><img src="/assets/img/shots/dashboard-light-1280.webp" alt=""></div>
+</div>
+</body></html>
