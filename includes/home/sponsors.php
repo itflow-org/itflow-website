@@ -2,7 +2,9 @@
 /*
  * Sponsors - the logo wall ($sponsors, $sponsors_section) and the tiers
  * ($sponsor_tiers, when sponsorship is on and the sign-up page is open).
- * A sponsor without a logo file yet shows as their name.
+ * A sponsor without a logo yet shows as their name. Linked to ITFlow, the
+ * paying sponsors with a place on the website are added to the wall by
+ * themselves (itflowSponsors()).
  */
 defined('ITFLOW_SITE') || exit;
 $show_wall = sectionOn('sponsors') && $sponsors;
@@ -17,12 +19,13 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
             </header>
             <ul class="sponsor-wall">
                 <?php foreach ($sponsors as $sponsor) {
-                    $has_logo = siteFileExists($sponsor['logo'] ?? '');
+                    // A logo file here, or - for a sponsor from ITFlow - the picture ITFlow sent
+                    $logo = !empty($sponsor['logo_data']) ? $sponsor['logo_data'] : (siteFileExists($sponsor['logo'] ?? '') ? asset($sponsor['logo']) : '');
                     $tag = !empty($sponsor['url']) ? 'a' : 'span'; ?>
                     <li class="sponsor<?= !empty($sponsor['featured']) ? ' sponsor-featured' : '' ?>">
                         <<?= $tag ?> class="sponsor-tile"<?= $tag === 'a' ? ' href="' . e($sponsor['url']) . '" target="_blank" rel="noopener"' : '' ?>>
-                            <?php if ($has_logo) { ?>
-                                <img src="<?= asset($sponsor['logo']) ?>" alt="<?= e($sponsor['name']) ?>" loading="lazy">
+                            <?php if ($logo !== '') { ?>
+                                <img src="<?= e($logo) ?>" alt="<?= e($sponsor['name']) ?>" loading="lazy">
                             <?php } else { ?>
                                 <span class="sponsor-name"><?= e($sponsor['name']) ?></span>
                             <?php } ?>
@@ -40,16 +43,8 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
             <ul class="tiers">
                 <?php foreach ($sponsor_tiers as $key => $tier) { ?>
                     <li class="tier">
-                        <h4><i class="<?= e($tier['icon']) ?>" aria-hidden="true"></i><?= e($tier['name']) ?></h4>
-                        <p class="tier-price"><?= money($tier['price']) ?><?= !empty($tier['custom']) ? '+' : '' ?><span>a month</span></p>
-                        <ul class="checklist">
-                            <?php if (!empty($tier['includes']) && isset($sponsor_tiers[$tier['includes']])) { ?>
-                                <li class="tier-includes">Everything in <?= e($sponsor_tiers[$tier['includes']]['name']) ?></li>
-                            <?php } ?>
-                            <?php foreach ($tier['perks'] as $perk) { ?>
-                                <li><?= e($perk) ?></li>
-                            <?php } ?>
-                        </ul>
+                        <?= tierHead($tier, 'h4') ?>
+                        <?= tierPerks($tier, $sponsor_tiers) ?>
                         <a class="button button-secondary button-small" href="hosting.php?want=sponsor&amp;tier=<?= e($key) ?>" aria-label="<?= e($sponsors_section['button'] . ': ' . $tier['name']) ?>"><?= e($sponsors_section['button']) ?></a>
                     </li>
                 <?php } ?>

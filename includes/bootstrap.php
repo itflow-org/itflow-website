@@ -9,8 +9,10 @@ define('ITFLOW_SITE', true);
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/itflow_link.php';
 
-// Prices, regions and the app domain from our billing ITFlow when the sign-up form is linked to it
+// Prices, regions, the app domain and the paying sponsors from our billing ITFlow when the sign-up form is linked to it
 $hosting = itflowHostingInfo($hosting);
+$sponsor_tiers = itflowSponsorTiers($sponsor_tiers);
+$sponsors = itflowSponsors($sponsors);
 
 /* Text made safe for HTML. */
 function e($value) {
@@ -160,6 +162,38 @@ function initials($name) {
         $letters .= mb_strtoupper(mb_substr($word, 0, 1));
     }
     return $letters;
+}
+
+/*
+ * The top of a sponsorship tier's card - its icon in a circle, name and price - and its
+ * perks, with "Everything in X, plus" first when it builds on another tier. Used by the
+ * homepage tiers and the sign-up form, so the two look alike.
+ */
+function tierHead(array $tier, $name_tag = 'strong') {
+    return '<span class="tier-icon" aria-hidden="true"><i class="' . e($tier['icon'] ?? 'fas fa-heart') . '"></i></span>'
+        . "<$name_tag class=\"tier-name\">" . e($tier['name']) . "</$name_tag>"
+        . '<span class="tier-amount">' . money($tier['price']) . (!empty($tier['custom']) ? '+' : '') . '<small>/mo</small></span>';
+}
+/* Does a tier get a place on itflow.org - 'listed' on it, or on a tier it includes? */
+function tierListed($key, array $tiers) {
+    for ($seen = 0; isset($tiers[$key]) && $seen < 10; $seen++) {
+        if (!empty($tiers[$key]['listed'])) {
+            return true;
+        }
+        $key = $tiers[$key]['includes'] ?? '';
+    }
+    return false;
+}
+
+function tierPerks(array $tier, array $tiers) {
+    $html = '<ul class="tier-perks">';
+    if (!empty($tier['includes']) && isset($tiers[$tier['includes']])) {
+        $html .= '<li class="tier-includes"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Everything in ' . e($tiers[$tier['includes']]['name']) . ', plus</span></li>';
+    }
+    foreach ((array) ($tier['perks'] ?? []) as $perk) {
+        $html .= '<li><i class="fas fa-check" aria-hidden="true"></i><span>' . e($perk) . '</span></li>';
+    }
+    return $html . '</ul>';
 }
 
 /* Does a file under the site exist? For optional logos and photos. */

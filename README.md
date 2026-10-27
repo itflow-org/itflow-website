@@ -17,13 +17,13 @@ Everything you'd change lives in **`config.php`**, top to bottom in page order:
 | "Everything an MSP runs on" - the feature cards (icon, title, a sentence or two each) | `$features` |
 | "ITFlow in action" - the six steps and their screenshots | `$tour` |
 | "Get started" - host it yourself, hosted ITFlow, the demo | `$start` |
-| Sponsors and their logos | `$sponsors` (logo files go in `assets/img/sponsors/`) |
+| Sponsors and their logos | `$sponsors` (logo files go in `assets/img/sponsors/`). Linked to ITFlow, paying sponsors are added after these by themselves |
 | Sponsors section text | `$sponsors_section` |
 | About timeline | `$timeline` (oldest first) |
 | Core team | `$team` (photos go in `assets/img/team/`) |
 | Footer text, social buttons, link columns | `$footer` |
-| Hosting prices and regions | `$hosting` |
-| Sponsorship tiers and perks | `$sponsor_tiers` |
+| Hosting prices, regions and the fallback time zone | `$hosting` |
+| Sponsorship tiers: name, price, icon, perks, the tier each one builds on, and `'listed'` for a place on itflow.org | `$sponsor_tiers` |
 | Sign-up recipients and required fields | `$signup` |
 | Mail server | `$mail` |
 
@@ -51,7 +51,11 @@ Icons are [Font Awesome 6 free](https://fontawesome.com/search?o=r&m=free) class
 
 ### Required fields
 
-`$signup['required']` lists which sign-up fields a customer must fill in: any of `address`, `city`, `state`, `postal`, `country`, `title`, `phone` (phone *or* mobile), `timezone`. Company name and the primary contact's name and email are always required. The form marks required fields with a red asterisk, checks them in the browser, and checks them again on the server.
+`$signup['required']` lists which sign-up fields a customer must fill in: any of `address`, `city`, `state`, `postal`, `country`, `title`, `phone` (phone *or* mobile). Company name and the primary contact's name and email are always required. The form marks required fields with a red asterisk, checks them in the browser, and checks them again on the server.
+
+### Time zone
+
+The form doesn't ask for a time zone. The visitor's browser says which one they're in, and their ITFlow is set up in it. When the browser doesn't say, `$hosting['default_timezone']` is used instead. The sign-up email says which it was, and the customer can change it in ITFlow's settings afterwards.
 
 ### Links that preselect the sign-up
 
@@ -83,18 +87,26 @@ It writes both widths into `assets/img/shots/` and trims the scrollbar off the e
 
 `assets/img/og.png` is the picture shown when a link to the site is shared (1200 x 630). It mentions the $60 price, so make it again if that changes: `tools/og.html` is its source - open it on the site in a 1200 x 630 browser window and save a screenshot over `og.png`.
 
-## Hosted sign-ups straight into ITFlow
+## Sign-ups straight into ITFlow
 
-Link the form to the billing ITFlow's Hosting add-on and a hosted sign-up needs nobody: it creates the client, the recurring invoice and the first invoice there, and the customer goes straight to a Pay button. Their ITFlow is built as soon as that invoice is paid, and they get an email with a link to set their password. Put the two lines from Hosting > Settings in that ITFlow into `config.local.php`:
+Link the form to the billing ITFlow's Hosting add-on and sign-ups need nobody:
+
+- **Hosted ITFlow** - the client, the recurring invoice and the first invoice are made there, and the customer goes straight to a Pay button. Their ITFlow is built as soon as that invoice is paid, and they get an email with a link to set their password.
+- **Sponsorships** - the same: a recurring invoice for the tier and the first invoice with its Pay button. Once it is paid, the sponsor is emailed their white-label key, and staff get a to-do for the forum heart and the GitHub README.
+- **Both together** - one client, an invoice each, and a Pay button each.
+
+Put the two lines from Hosting > Settings in that ITFlow into `config.local.php`:
 
 ```php
 $signup['itflow_url']    = 'https://billing.example.com';
 $signup['itflow_secret'] = 'the secret shown there';
 ```
 
-Linked, the prices, technicians and regions come from ITFlow (its two Hosted ITFlow products and its servers) instead of `$hosting`, kept for 10 minutes, so they are set in one place. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
+Linked, the prices, technicians and regions come from ITFlow (its Hosted ITFlow products and its servers) instead of `$hosting`, and the tier prices from its sponsorship products instead of `$sponsor_tiers` - kept for 10 minutes, so they are set in one place. The tiers' keys here (`forum`, `github`, `website`, `custom`) must be the add-on's. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
 
-If ITFlow can't be reached, or isn't taking sign-ups, the form emails the request like before - marked "NOT created" so someone adds it by hand - so no sign-up is lost. Sponsorships are always emailed.
+**Paying sponsors show by themselves.** Sponsors whose tier is `'listed'` (here, Website Company and Name Your Price, which includes it) are added to the logo wall and the footer line while they pay, after the sponsors in `$sponsors` - a name already there isn't shown twice. Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
+
+If ITFlow can't be reached, or isn't taking sign-ups or sponsorships, the form emails the request like before - marked "NOT created" so someone adds it by hand - so no sign-up is lost.
 
 ## Mail
 
@@ -110,7 +122,7 @@ Keep the real form secret and mail password out of git, in `config.local.php` ne
 <?php
 $signup['form_secret']   = 'a-long-random-string';
 $mail['password']        = 'smtp-password';
-$signup['itflow_url']    = 'https://billing.example.com';   // optional - see "Hosted sign-ups straight into ITFlow"
+$signup['itflow_url']    = 'https://billing.example.com';   // optional - see "Sign-ups straight into ITFlow"
 $signup['itflow_secret'] = 'from Hosting > Settings';
 ```
 
@@ -147,12 +159,12 @@ require __DIR__ . '/includes/footer.php';
 |---|---|
 | `config.php` | All content and settings |
 | `index.php` | The homepage - shows the parts in `includes/home/` that are switched on |
-| `hosting.php` | The hosted ITFlow and sponsorship sign-up |
+| `hosting.php` | The hosted ITFlow and sponsorship sign-up, and the Pay step after it |
 | `includes/bootstrap.php` | Loads the config; small helpers (`e()`, `money()`, `shot()`, `logoHtml()`, `sectionOn()` ...) |
 | `includes/header.php`, `includes/footer.php` | The top and bottom of every page |
 | `includes/home/*.php` | Each homepage section |
 | `includes/mailer.php` | Sending mail with PHPMailer |
-| `includes/itflow_link.php` | The link to the billing ITFlow's Hosting add-on: signed requests, its prices and regions |
+| `includes/itflow_link.php` | The link to the billing ITFlow's Hosting add-on: signed requests, its prices, regions and tier prices, and the paying sponsors |
 | `assets/css/site.css` | All the styles, light and dark |
 | `assets/js/site.js` | The phone menu and "ITFlow in action" |
 | `assets/fonts/` | Inter (SIL Open Font License, `OFL.txt`) |

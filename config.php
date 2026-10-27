@@ -66,7 +66,7 @@ $nav = [
     ['label' => 'About',    'href' => '#about',    'section' => 'about'],
     ['label' => 'Docs',     'href' => 'https://docs.itflow.org',     'external' => true],
     ['label' => 'Forum',    'href' => 'https://forum.itflow.org',    'external' => true],
-    ['label' => 'Services', 'href' => 'https://services.itflow.org', 'external' => true],
+    ['label' => 'Sign-in',  'href' => 'https://portal.itflow.org',   'external' => true],
 ];
 
 // ---------------------------------------------------------------------------
@@ -279,7 +279,7 @@ $footer = [
         'Help' => [
             ['label' => 'Documentation', 'href' => 'https://docs.itflow.org'],
             ['label' => 'Forum',         'href' => 'https://forum.itflow.org'],
-            ['label' => 'Paid services', 'href' => 'https://services.itflow.org'],
+            ['label' => 'Sign-in',       'href' => 'https://portal.itflow.org'],
         ],
         'Project' => [
             ['label' => 'GitHub',        'href' => 'https://github.com/itflow-org/itflow'],
@@ -300,18 +300,25 @@ $hosting = [
     'regions'        => [
         'us-east02' => 'US East (us-east02)',
     ],
+    // A new ITFlow is set up in the customer's time zone, which the sign-up form takes from
+    // their browser. This one is used when the browser doesn't say. They can change it in ITFlow.
+    'default_timezone' => 'America/New_York',
 ];
 
 // ---------------------------------------------------------------------------
 // Sponsorship tiers - monthly. 'custom' => true lets them name an amount >= price.
 // 'includes' names the tier whose perks this one also gets ("Everything in X, plus").
+// 'icon' is a Font Awesome class, shown in the circle at the top of the tier's card.
+// 'listed' => true: the tier (and every tier that includes it) shows on itflow.org.
+// Linked to ITFlow, the keys must match the Hosting add-on's tiers - its prices are used,
+// and it sends paying listed sponsors to the logo wall by itself.
 // ---------------------------------------------------------------------------
 $sponsor_tiers = [
     'forum' => [
         'name'  => 'Forum User Sponsor',
         'price' => 60,
         'icon'  => 'fab fa-discourse',
-        'perks' => ['Your name listed as a sponsor on the ITFlow forum'],
+        'perks' => ['Support perks', 'A heart next to your ITFlow forum user', 'White label - no "Powered by ITFlow"'],
     ],
     'github' => [
         'name'     => 'GitHub Company Sponsor',
@@ -325,6 +332,7 @@ $sponsor_tiers = [
         'price'    => 200,
         'icon'     => 'fas fa-globe',
         'includes' => 'github',
+        'listed'   => true,
         'perks'    => ['Your logo and link on itflow.org', 'Your name in the itflow.org footer'],
     ],
     'custom' => [
@@ -341,7 +349,7 @@ $sponsor_tiers = [
 // Sign-up form (hosting.php)
 // 'required' lists the fields a customer must fill in. Company name, primary
 // contact name and email are always required. 'phone' means phone OR mobile.
-// Choices: address, city, state, postal, country, title, phone, timezone
+// Choices: address, city, state, postal, country, title, phone
 // ---------------------------------------------------------------------------
 $signup = [
     'notify_to'   => ['sales@itflow.org'],                  // who receives sign-ups (one or more)
