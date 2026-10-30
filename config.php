@@ -25,12 +25,12 @@ $sections = [
     'features'        => true,   // The feature cards
     'tour'            => true,   // "ITFlow in action" - one ticket from the inbox to the bank
     'start'           => true,   // "Get started" - host it yourself, hosted, or the demo
-    'hosting'         => true,   // Hosted ITFlow: its card, the line under the top buttons, and hosting on the sign-up form
+    'hosting'         => false,   // Hosted ITFlow: its card, the line under the top buttons, and hosting on the sign-up form
     'sponsors'        => true,   // Sponsor logo wall on the homepage
     'sponsorship'     => true,   // Accept sponsorships: tiers on the homepage and on the sign-up form
     'about'           => true,   // Timeline
     'team'            => true,   // Core team
-    'signup'          => true,   // The sign-up page (hosting.php) itself
+    'signup'          => false,   // The sign-up page (hosting.php) itself
     'footer_sponsors' => true,   // "Sponsored by ..." line in the footer
 ];
 
@@ -225,8 +225,8 @@ $timeline = [
         ['date' => '2018',         'title' => 'An open-source MSP', 'text' => 'An MSP built on open-source software needs a system to run on, and starts writing ITFlow.'],
         ['date' => 'March 2019',   'title' => 'On GitHub',          'text' => 'The code is published for anyone to use, change and improve.'],
         ['date' => 'May 2021',     'title' => 'The team grows',     'text' => 'Marcus and Andrei join the development team.'],
-        ['date' => 'April 2023',   'title' => '300 stars',          'text' => 'More than 300 stars on GitHub, and work begins toward a stable release.'],
         ['date' => 'January 2025', 'title' => 'Stable releases',    'text' => 'ITFlow moves to regular stable releases.'],
+        ['date' => 'October 2026', 'title' => 'ITFlow neXt',        'text' => 'ITFlow completey redesigned!'],
     ],
 ];
 
