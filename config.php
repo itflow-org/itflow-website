@@ -195,40 +195,42 @@ $start = [
 
 // ---------------------------------------------------------------------------
 // Sponsors
-// Shown as a logo wall on the homepage, and named on the sign-up page, in this
-// order - the longest-standing first.
-// 'logo' is optional: a path under assets/img/sponsors/. Until the file exists,
-// the sponsor's name is shown as a text tile instead, so nothing ever breaks.
-// Logos are sized to look the same weight whatever their shape (see the
-// README in that folder).
-// 'since' is optional: the month they started, 'YYYY-MM' (or just 'YYYY'),
-// shown under the name as "Since Dec 2025".
-// 'featured' => true gives the sponsor a larger tile (e.g. Website tier sponsors).
+// Shown on the homepage, and named on the sign-up page, in this order - the
+// longest-standing first. Two kinds:
+// - 'premier' => true: a tile of their own with their logo and when they started.
+//   'logo' is a path under assets/img/sponsors/ - until the file exists, their
+//   name shows on the tile instead. Logos are sized to look the same weight
+//   whatever their shape (see the README in that folder).
+// - the rest: their name, linking to their website, in the list below the tiles.
+// 'since' is the month they started, 'YYYY-MM' (or just 'YYYY') - "Since Dec 2025"
+// on a premier tile, and on hovering a name in the list.
 // ---------------------------------------------------------------------------
 $sponsors = [
-    ['name' => 'PittPC',                  'logo' => 'assets/img/sponsors/pittpc.png',        'url' => 'https://pittpc.com', 'featured' => true],
-    ['name' => 'F1 for Help',             'logo' => 'assets/img/sponsors/f1forhelp.png',     'url' => 'https://f1forhelp.net',          'since' => '2024-01'],
-    ['name' => 'CompuMatter',             'logo' => 'assets/img/sponsors/compumatter.png',   'url' => 'https://compumatter.com',        'since' => '2024-02'],
-    ['name' => 'DINadmin ApS',            'logo' => 'assets/img/sponsors/dinadmin.png',      'url' => 'https://dinadmin.dk',            'since' => '2025-03'],
-    ['name' => 'DigiBandit',              'logo' => 'assets/img/sponsors/digibandit.png',    'url' => 'https://dbits.ca',               'since' => '2025-05'],
-    ['name' => 'Mountaineer IT',          'logo' => 'assets/img/sponsors/mountaineerit.png', 'url' => 'https://mountaineerit.com',      'since' => '2025-12'],
-    ['name' => 'DataBit Solutions',       'logo' => 'assets/img/sponsors/databit.png',       'url' => 'https://databitsolutions.com',   'since' => '2025-12'],
-    ['name' => 'City of Rathdrum',        'logo' => 'assets/img/sponsors/rathdrum.png',      'url' => 'https://rathdrumpolice.gov',     'since' => '2025-12'],
-    ['name' => 'Algolibre',               'logo' => 'assets/img/sponsors/algolibre.png',     'url' => 'https://algolibre.io',           'since' => '2026-08'],
-    ['name' => 'Pentagon Networks',       'logo' => 'assets/img/sponsors/pentagon.png',      'url' => 'https://pentagon.net',           'since' => '2026-08'],
-    ['name' => 'Hanobox e.K.',            'logo' => 'assets/img/sponsors/hanobox.png',       'url' => 'https://hanobox.de',             'since' => '2026-10'],
-    ['name' => 'Innovarro Group Limited', 'logo' => 'assets/img/sponsors/innovarro.png',     'url' => 'https://innovarro.com',          'since' => '2026-10'],
+    ['name' => 'PittPC',                  'premier' => true, 'logo' => 'assets/img/sponsors/pittpc.svg',        'url' => 'https://pittpc.com'],
+    ['name' => 'DigiBandit',              'premier' => true, 'logo' => 'assets/img/sponsors/digibandit.png',    'url' => 'https://dbits.ca',             'since' => '2025-05'],
+    ['name' => 'Mountaineer IT',          'premier' => true, 'logo' => 'assets/img/sponsors/mountaineerit.png', 'url' => 'https://mountaineerit.com',    'since' => '2025-12'],
+    ['name' => 'F1 for Help',             'url' => 'https://f1forhelp.net',          'since' => '2024-01'],
+    ['name' => 'CompuMatter',             'url' => 'https://compumatter.com',        'since' => '2024-02'],
+    ['name' => 'DINadmin ApS',            'url' => 'https://dinadmin.dk',            'since' => '2025-03'],
+    ['name' => 'DataBit Solutions',       'url' => 'https://databitsolutions.com',   'since' => '2025-12'],
+    ['name' => 'City of Rathdrum',        'url' => 'https://rathdrumpolice.gov',     'since' => '2025-12'],
+    ['name' => 'Algolibre',               'url' => 'https://algolibre.io',           'since' => '2026-08'],
+    ['name' => 'Pentagon Networks',       'url' => 'https://pentagon.net',           'since' => '2026-08'],
+    ['name' => 'Hanobox e.K.',            'url' => 'https://hanobox.de',             'since' => '2026-10'],
+    ['name' => 'Innovarro Group Limited', 'url' => 'https://innovarro.com',          'since' => '2026-10'],
 ];
 
 $sponsors_section = [
     'heading'       => 'Kept free by its sponsors',
     'text'          => 'ITFlow has no paid edition. These companies help pay for its development.',
-    // A tile on the wall for the sponsors who'd rather not be named - not in the
-    // sign-up page's list. Leave out to show no such tile.
+    'premier_title' => 'Premier sponsors',
+    'list_title'    => 'Sponsors',
+    // After the list of names, for the sponsors who'd rather not be named - not
+    // in the sign-up page's list. Leave out to show no such line.
     'anonymous'     => ['text' => 'And many more who sponsor anonymously', 'since' => '2024'],
-    // The last tile, inviting the next sponsor. It opens the sign-up form while
-    // that is open, and 'url' while it isn't. Leave out to show no such tile.
-    'join'          => ['title' => 'Your logo here', 'text' => 'Become a sponsor', 'url' => 'https://services.itflow.org'],
+    // The last premier tile, inviting the next sponsor. It opens the sign-up form
+    // while that is open, and 'url' while it isn't. Leave out to show no such tile.
+    'join'          => ['title' => 'Your logo here', 'text' => 'Become a premier sponsor', 'url' => 'https://services.itflow.org'],
     'tiers_heading' => 'Sponsor ITFlow',
     'tiers_text'    => 'Back the software your MSP runs on, and put your name in front of the people who use it.',
     'button'        => 'Become a sponsor',

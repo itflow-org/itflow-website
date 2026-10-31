@@ -162,6 +162,7 @@ function itflowSponsors(array $sponsors) {
             'url' => preg_match('#^https?://#i', $url) ? $url : '',
             'logo_data' => preg_match('#^data:image/(png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$#', $logo) ? $logo : '',
             'featured' => !empty($s['featured']),
+            'premier' => true,   // a listed tier - its logo and link on the site
         ];
         $have[] = mb_strtolower($name);
     }

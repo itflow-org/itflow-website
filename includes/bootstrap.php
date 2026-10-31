@@ -87,25 +87,38 @@ function sponsorSince($since) {
     return preg_match('/^\d{4}$/', $since) ? "Since $since" : '';
 }
 
+/* A premier sponsor - a tile with their logo - rather than a name in the list. ITFlow's 'featured' counts. */
+function sponsorIsPremier(array $sponsor) {
+    return !empty($sponsor['premier']) || !empty($sponsor['featured']);
+}
+
 /*
  * The size to show a sponsor's logo at, [width, height] - every logo given about
  * the same area, so a wide wordmark and a square badge look the same weight, and
- * kept inside the tile. A featured sponsor's is bigger. null when the picture's
- * size can't be read (an SVG, say) - the stylesheet's limits apply then.
+ * kept inside the tile. An SVG's comes from its width and height, or its viewBox.
+ * null when the picture's size can't be read - the stylesheet's limits apply then.
  */
-function sponsorLogoSize($src, $featured = false) {
+function sponsorLogoSize($src) {
     $src = (string) $src;
     if (strncmp($src, 'data:', 5) === 0) {
-        $size = @getimagesizefromstring((string) base64_decode(substr($src, strpos($src, ',') + 1)));
+        $bytes = (string) base64_decode(substr($src, strpos($src, ',') + 1));
     } else {
         $file = __DIR__ . '/../' . ltrim($src, '/');
-        $size = is_file($file) ? @getimagesize($file) : false;
+        $bytes = is_file($file) ? (string) file_get_contents($file) : '';
+    }
+    $size = $bytes !== '' ? @getimagesizefromstring($bytes) : false;
+    if (!$size && preg_match('/<svg\b[^>]*>/i', $bytes, $tag)) {
+        if (preg_match('/\bwidth="([\d.]+)(px)?"/', $tag[0], $w) && preg_match('/\bheight="([\d.]+)(px)?"/', $tag[0], $h)) {
+            $size = [(float) $w[1], (float) $h[1]];
+        } elseif (preg_match('/\bviewBox="[\d.\-]+[ ,]+[\d.\-]+[ ,]+([\d.]+)[ ,]+([\d.]+)"/', $tag[0], $box)) {
+            $size = [(float) $box[1], (float) $box[2]];
+        }
     }
     if (!$size || $size[0] <= 0 || $size[1] <= 0) {
         return null;
     }
     $ratio = $size[0] / $size[1];
-    [$area, $max_w, $max_h] = $featured ? [16000, 240, 72] : [11000, 196, 64];
+    [$area, $max_w, $max_h] = [15000, 230, 76];
     $w = sqrt($area * $ratio);
     $h = $w / $ratio;
     $fit = min(1, $max_w / $w, $max_h / $h);
