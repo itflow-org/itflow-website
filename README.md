@@ -17,7 +17,7 @@ Everything you'd change lives in **`config.php`**, top to bottom in page order:
 | "Everything an MSP runs on" - the feature cards (icon, title, a sentence or two each) | `$features` |
 | "ITFlow in action" - the six steps and their screenshots | `$tour` |
 | "Get started" - host it yourself, hosted ITFlow, the demo | `$start` |
-| Sponsors, longest-standing first: `'tier'` is how each shows - `'premier'` a large tile with their logo, `'company'` a smaller logo tile (logo files go in `assets/img/sponsors/`), no tier (a supporter) their name; `'since' => 'YYYY-MM'` when each started | `$sponsors`. Linked to ITFlow, paying sponsors are added by themselves |
+| Sponsors, longest-standing first: `'tier'` is how each shows - `'premier'` (Premier Sponsor) a large tile with their logo, `'company'` (Sponsor) a smaller logo tile (logo files go in `assets/img/sponsors/`), no tier (a Supporter) their name; `'since' => 'YYYY-MM'` when each started | `$sponsors`. Linked to ITFlow, paying sponsors are added by themselves |
 | Sponsors section text, the three headings, the anonymous sponsors' line (`'anonymous'`) and the "Your logo here" tile (`'join'`) | `$sponsors_section` |
 | About timeline | `$timeline` (oldest first) |
 | Core team | `$team` (photos go in `assets/img/team/`) |
@@ -107,7 +107,7 @@ $signup['itflow_secret'] = 'the secret shown there';
 
 Linked, the prices, technicians and regions come from ITFlow (its Hosted ITFlow products and its servers) instead of `$hosting`, and the tier prices from its sponsorship products instead of `$sponsor_tiers` - kept for 10 minutes, so they are set in one place. The tiers' keys here (`supporter`, `company`, `premier`) must be the add-on's. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
 
-**Paying sponsors show by themselves.** Sponsors who aren't anonymous are added while they pay, by their tier - premier sponsors' large logos, company sponsors' logos, supporters' names - after the sponsors in `$sponsors`; a name already there isn't shown twice. (When ITFlow doesn't say which tier, a featured sponsor shows as premier and the rest as company sponsors.) Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
+**Paying sponsors show by themselves.** Sponsors who aren't anonymous are added while they pay, by their tier - Premier Sponsors' large logos, Sponsors' logos, Supporters' names - after the sponsors in `$sponsors`; a name already there isn't shown twice. (When ITFlow doesn't say which tier, a featured sponsor shows as a Premier Sponsor and the rest in the Sponsor tier.) Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
 
 If ITFlow can't be reached, or isn't taking sign-ups or sponsorships, the form emails the request like before - marked "NOT created" so someone adds it by hand - so no sign-up is lost.
 

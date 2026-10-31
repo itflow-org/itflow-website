@@ -162,7 +162,7 @@ function itflowSponsors(array $sponsors) {
             'url' => preg_match('#^https?://#i', $url) ? $url : '',
             'logo_data' => preg_match('#^data:image/(png|jpeg|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$#', $logo) ? $logo : '',
             'featured' => !empty($s['featured']),
-            // Their tier, when ITFlow says - else a featured one is premier, the rest company sponsors
+            // Their tier, when ITFlow says - else a featured one is premier, the rest the Sponsor tier ('company')
             'tier' => (string) ($s['tier'] ?? (!empty($s['featured']) ? 'premier' : 'company')),
         ];
         $have[] = mb_strtolower($name);

@@ -252,7 +252,7 @@ function initials($name) {
 
 /*
  * The top of a sponsorship tier's card - its icon in a circle, name and price - and its
- * perks, with "Everything in X, plus" first when it builds on another tier. Used by the
+ * perks, with "Everything in the X tier, plus" first when it builds on another tier. Used by the
  * homepage tiers and the sign-up form, so the two look alike.
  */
 function tierHead(array $tier, $name_tag = 'strong') {
@@ -298,7 +298,7 @@ function forumUsernames($text) {
 function tierPerks(array $tier, array $tiers) {
     $html = '<ul class="tier-perks">';
     if (!empty($tier['includes']) && isset($tiers[$tier['includes']])) {
-        $html .= '<li class="tier-includes"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Everything in ' . e($tiers[$tier['includes']]['name']) . ', plus</span></li>';
+        $html .= '<li class="tier-includes"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Everything in the ' . e($tiers[$tier['includes']]['name']) . ' tier, plus</span></li>';
     }
     foreach ((array) ($tier['perks'] ?? []) as $perk) {
         $html .= '<li><i class="fas fa-check" aria-hidden="true"></i><span>' . e($perk) . '</span></li>';

@@ -52,7 +52,7 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
             <?php } ?>
             <?php if ($company) { ?>
                 <div class="sponsor-group">
-                    <h3 class="sponsor-group-title"><?= e($sponsors_section['company_title'] ?? 'Company sponsors') ?></h3>
+                    <h3 class="sponsor-group-title"><?= e($sponsors_section['company_title'] ?? 'Sponsors') ?></h3>
                     <ul class="sponsor-wall sponsor-wall-company">
                         <?php foreach ($company as $sponsor) {
                             echo sponsorTileHtml($sponsor, 'logo');

@@ -198,7 +198,7 @@ $start = [
 // longest-standing first. 'tier' is their key in $sponsor_tiers below, and the
 // tier's 'show' says how they appear:
 // - 'large' (Premier Sponsor): a large tile with their logo and when they started
-// - 'logo' (Company Sponsor): a smaller tile with their logo
+// - 'logo' (Sponsor): a smaller tile with their logo
 // - 'name' (Supporter - and anyone without a 'tier'): their name, linking to their website
 // 'logo' is a path under assets/img/sponsors/ - until the file exists, their name
 // shows on the tile instead. Logos are sized to look the same weight whatever their
@@ -225,7 +225,7 @@ $sponsors_section = [
     'heading'       => 'Kept free by its sponsors',
     'text'          => 'ITFlow has no paid edition. These companies help pay for its development.',
     'premier_title' => 'Premier sponsors',
-    'company_title' => 'Company sponsors',
+    'company_title' => 'Sponsors',
     'list_title'    => 'Supporters',
     // After the list of names, for the sponsors who'd rather not be named - not
     // in the sign-up page's list. Leave out to show no such line.
@@ -330,7 +330,8 @@ $hosting = [
 
 // ---------------------------------------------------------------------------
 // Sponsorship tiers - monthly. 'custom' => true lets them name an amount >= price.
-// 'includes' names the tier whose perks this one also gets ("Everything in X, plus").
+// 'includes' names the tier whose perks this one also gets ("Everything in the X tier, plus").
+// The keys are what links and the Hosting add-on use, so they stay put when a tier is renamed.
 // 'icon' is a Font Awesome class, shown in the circle at the top of the tier's card.
 // 'show' is how the tier's sponsors appear on itflow.org - 'name', 'logo' or 'large'.
 // 'whitelabel' => true: the tier (and every tier that includes it) gets a white-label key.
@@ -347,7 +348,7 @@ $sponsor_tiers = [
         'perks' => ['Your name on itflow.org', 'A heart next to your name on the ITFlow forum'],
     ],
     'company' => [
-        'name'       => 'Company Sponsor',
+        'name'       => 'Sponsor',
         'price'      => 120,
         'icon'       => 'fas fa-building',
         'includes'   => 'supporter',

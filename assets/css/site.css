@@ -439,7 +439,7 @@ a.sponsor-tile:hover .sponsor-logo, a.sponsor-tile:focus-visible .sponsor-logo {
     .sponsor-logo { opacity: .7; }
 }
 .sponsor-name { font-size: 1.5rem; font-weight: 750; letter-spacing: -0.015em; text-wrap: balance; }
-/* Company sponsors - smaller tiles */
+/* The Sponsor tier ('company') - smaller logo tiles */
 .sponsor-wall-company { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 @media (max-width: 559px) { .sponsor-wall-company { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; } }
 .sponsor-wall-company .sponsor-tile { min-height: 104px; padding: 16px 14px; gap: 6px; border-radius: 12px; }

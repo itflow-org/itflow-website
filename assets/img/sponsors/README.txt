@@ -1,4 +1,4 @@
-Premier and company sponsors' logos go in this folder - supporters are listed by name.
+Logos for Premier Sponsors and Sponsors go in this folder - Supporters are listed by name.
 
 Use the file names set in config.php ($sponsors), e.g. pittpc.png.
 
