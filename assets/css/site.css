@@ -418,16 +418,20 @@ figcaption { margin-top: 12px; color: var(--muted); font-size: .94rem; line-heig
 .sponsor-featured { flex-grow: 1.5; }
 @media (max-width: 639px) { .sponsor { flex-basis: 140px; } }
 .sponsor-tile {
-    display: flex; align-items: center; justify-content: center;
-    height: 96px; padding: 16px 28px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    min-height: 96px; height: 100%; padding: 16px 18px; text-align: center;
     border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
     color: var(--muted); text-decoration: none;
 }
 a.sponsor-tile:hover { border-color: var(--line-strong); color: var(--ink); }
 .sponsor-tile img { max-height: 56px; max-width: 220px; width: auto; filter: grayscale(1); opacity: .8; transition: filter .2s, opacity .2s; }
 a.sponsor-tile:hover img { filter: none; opacity: 1; }
-.sponsor-name { font-size: 1.3rem; font-weight: 750; letter-spacing: -0.015em; }
+.sponsor-name { font-size: 1.3rem; font-weight: 750; letter-spacing: -0.015em; text-wrap: balance; }
 .sponsor-featured .sponsor-name { font-size: 1.6rem; }
+.sponsor-since { font-size: .82rem; font-weight: 500; color: var(--muted); }
+.sponsor-anonymous { flex-grow: 2; }
+.sponsor-anonymous .sponsor-tile { border-style: dashed; background: transparent; }
+.sponsor-anonymous .sponsor-name { font-size: 1.05rem; font-weight: 650; letter-spacing: 0; }
 
 .tiers-head { margin-top: 88px; max-width: 760px; }
 .tiers-head:first-child { margin-top: 0; }

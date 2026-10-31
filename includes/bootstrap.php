@@ -78,6 +78,15 @@ function sponsorNames(array $sponsors) {
     }, $sponsors), 'strlen'));
 }
 
+/* When a sponsor started - 'YYYY-MM' as "Since Dec 2025", 'YYYY' as "Since 2024" - or '' when it isn't set. */
+function sponsorSince($since) {
+    $since = trim((string) $since);
+    if (preg_match('/^(\d{4})-(\d{2})$/', $since, $m) && checkdate((int) $m[2], 1, (int) $m[1])) {
+        return 'Since ' . date('M Y', mktime(0, 0, 0, (int) $m[2], 1, (int) $m[1]));
+    }
+    return preg_match('/^\d{4}$/', $since) ? "Since $since" : '';
+}
+
 /* "A", "A and B", "A, B and C". */
 function listNames(array $names) {
     if (count($names) <= 1) {

@@ -17,8 +17,8 @@ Everything you'd change lives in **`config.php`**, top to bottom in page order:
 | "Everything an MSP runs on" - the feature cards (icon, title, a sentence or two each) | `$features` |
 | "ITFlow in action" - the six steps and their screenshots | `$tour` |
 | "Get started" - host it yourself, hosted ITFlow, the demo | `$start` |
-| Sponsors and their logos | `$sponsors` (logo files go in `assets/img/sponsors/`). Linked to ITFlow, paying sponsors are added after these by themselves |
-| Sponsors section text | `$sponsors_section` |
+| Sponsors, their logos and when each started (`'since' => 'YYYY-MM'`, shown as "Since Dec 2025") | `$sponsors`, longest-standing first (logo files go in `assets/img/sponsors/`). Linked to ITFlow, paying sponsors are added after these by themselves |
+| Sponsors section text, and the anonymous sponsors' tile (`'anonymous'`) | `$sponsors_section` |
 | About timeline | `$timeline` (oldest first) |
 | Core team | `$team` (photos go in `assets/img/team/`) |
 | Footer text, social buttons, link columns | `$footer` |

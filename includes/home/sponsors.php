@@ -2,12 +2,14 @@
 /*
  * Sponsors - the logo wall ($sponsors, $sponsors_section) and the tiers
  * ($sponsor_tiers, when sponsorship is on and the sign-up page is open).
- * A sponsor without a logo yet shows as their name. Linked to ITFlow, the
- * paying sponsors with a place on the website are added to the wall by
- * themselves (itflowSponsors()).
+ * A sponsor without a logo yet shows as their name, with how long they have
+ * sponsored under it when config.php says. Linked to ITFlow, the paying
+ * sponsors with a place on the website are added to the wall by themselves
+ * (itflowSponsors()). The anonymous sponsors get one tile, last.
  */
 defined('ITFLOW_SITE') || exit;
 $show_wall = sectionOn('sponsors') && $sponsors;
+$anonymous = $sponsors_section['anonymous'] ?? null;
 $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
 ?>
 <section class="section sponsors" id="sponsors" aria-labelledby="sponsorsHeading">
@@ -21,7 +23,8 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
                 <?php foreach ($sponsors as $sponsor) {
                     // A logo file here, or - for a sponsor from ITFlow - the picture ITFlow sent
                     $logo = !empty($sponsor['logo_data']) ? $sponsor['logo_data'] : (siteFileExists($sponsor['logo'] ?? '') ? asset($sponsor['logo']) : '');
-                    $tag = !empty($sponsor['url']) ? 'a' : 'span'; ?>
+                    $tag = !empty($sponsor['url']) ? 'a' : 'span';
+                    $since = sponsorSince($sponsor['since'] ?? ''); ?>
                     <li class="sponsor<?= !empty($sponsor['featured']) ? ' sponsor-featured' : '' ?>">
                         <<?= $tag ?> class="sponsor-tile"<?= $tag === 'a' ? ' href="' . e($sponsor['url']) . '" target="_blank" rel="noopener"' : '' ?>>
                             <?php if ($logo !== '') { ?>
@@ -29,7 +32,21 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
                             <?php } else { ?>
                                 <span class="sponsor-name"><?= e($sponsor['name']) ?></span>
                             <?php } ?>
+                            <?php if ($since !== '') { ?>
+                                <span class="sponsor-since"><?= e($since) ?></span>
+                            <?php } ?>
                         </<?= $tag ?>>
+                    </li>
+                <?php } ?>
+                <?php if (!empty($anonymous['text'])) {
+                    $since = sponsorSince($anonymous['since'] ?? ''); ?>
+                    <li class="sponsor sponsor-anonymous">
+                        <span class="sponsor-tile">
+                            <span class="sponsor-name"><?= e($anonymous['text']) ?></span>
+                            <?php if ($since !== '') { ?>
+                                <span class="sponsor-since"><?= e($since) ?></span>
+                            <?php } ?>
+                        </span>
                     </li>
                 <?php } ?>
             </ul>
