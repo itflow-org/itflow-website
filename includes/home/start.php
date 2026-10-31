@@ -50,7 +50,7 @@ $show_hosted = hostingOn();
                     <?php } ?>
                 </ul>
                 <div class="path-actions">
-                    <a class="button button-primary" href="hosting.php?want=hosting"><?= e($hosted['button']) ?></a>
+                    <a class="button button-primary" href="signup.php?want=hosting"><?= e($hosted['button']) ?></a>
                 </div>
             </div>
             <?php } ?>

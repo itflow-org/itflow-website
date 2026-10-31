@@ -30,7 +30,7 @@ $sections = [
     'sponsorship'     => true,   // Accept sponsorships: tiers on the homepage and on the sign-up form
     'about'           => true,   // Timeline
     'team'            => true,   // Core team
-    'signup'          => true,   // The sign-up page (hosting.php) itself
+    'signup'          => true,   // The sign-up page (signup.php) itself
 ];
 
 // ---------------------------------------------------------------------------
@@ -296,8 +296,8 @@ $footer = [
         'ITFlow' => [
             ['label' => 'Try the demo',  'href' => 'https://demo.itflow.org'],
             ['label' => 'Install',       'href' => 'https://docs.itflow.org/installation'],
-            ['label' => 'Hosted ITFlow', 'href' => 'hosting.php?want=hosting', 'section' => 'hosting'],
-            ['label' => 'Sponsor',       'href' => 'hosting.php?want=sponsor', 'section' => 'sponsorship'],
+            ['label' => 'Hosted ITFlow', 'href' => 'signup.php?want=hosting', 'section' => 'hosting'],
+            ['label' => 'Sponsor',       'href' => 'signup.php?want=sponsor', 'section' => 'sponsorship'],
         ],
         'Help' => [
             ['label' => 'Documentation', 'href' => 'https://docs.itflow.org'],
@@ -367,7 +367,7 @@ $sponsor_tiers = [
 ];
 
 // ---------------------------------------------------------------------------
-// Sign-up form (hosting.php)
+// Sign-up form (signup.php)
 // 'required' lists the fields a customer must fill in. Company name, primary
 // contact name and email are always required. 'phone' means phone OR mobile.
 // Choices: address, city, state, postal, country, title, phone

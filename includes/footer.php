@@ -20,7 +20,7 @@ defined('ITFLOW_SITE') || exit;
         </div>
         <?php foreach ($footer['columns'] as $heading => $links) {
             $links = array_filter($links, function ($link) {
-                return sectionsOn($link['section'] ?? []) && (strpos($link['href'], 'hosting.php') !== 0 || signupOn());
+                return sectionsOn($link['section'] ?? []) && (strpos($link['href'], 'signup.php') !== 0 || signupOn());
             });
             if (!$links) {
                 continue;

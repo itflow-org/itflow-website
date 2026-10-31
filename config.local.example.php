@@ -57,7 +57,7 @@ $signup['itflow_secret'] = '';
 // Section switches - true shows it, false hides it everywhere
 // ===========================================================================
 
-// $sections['signup']      = false;   // the sign-up page (hosting.php) itself - on to take sign-ups
+// $sections['signup']      = false;   // the sign-up page (signup.php) itself - on to take sign-ups
 // $sections['hosting']     = false;   // hosted ITFlow: its card, the line under the top buttons, and on the sign-up form
 // $sections['sponsorship'] = true;    // sponsorship tiers on the homepage and the sign-up form (shown while 'signup' is on)
 // $sections['sponsors']    = true;    // the sponsors on the homepage

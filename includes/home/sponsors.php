@@ -22,7 +22,7 @@ $listed = $by_show['name'];
 $anonymous = $sponsors_section['anonymous'] ?? null;
 $anonymous_since = sponsorSince($anonymous['since'] ?? '');
 $join = $sponsors_section['join'] ?? null;
-$join_url = !$join ? '' : ((sectionOn('sponsorship') && signupOn()) ? 'hosting.php?want=sponsor' : (string) ($join['url'] ?? ''));
+$join_url = !$join ? '' : ((sectionOn('sponsorship') && signupOn()) ? 'signup.php?want=sponsor' : (string) ($join['url'] ?? ''));
 $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
 ?>
 <section class="section sponsors" id="sponsors" aria-labelledby="sponsorsHeading">
@@ -94,7 +94,7 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
                     <li class="tier">
                         <?= tierHead($tier, 'h4') ?>
                         <?= tierPerks($tier, $sponsor_tiers) ?>
-                        <a class="button button-secondary button-small" href="hosting.php?want=sponsor&amp;tier=<?= e($key) ?>" aria-label="<?= e($sponsors_section['button'] . ': ' . $tier['name']) ?>"><?= e($sponsors_section['button']) ?></a>
+                        <a class="button button-secondary button-small" href="signup.php?want=sponsor&amp;tier=<?= e($key) ?>" aria-label="<?= e($sponsors_section['button'] . ': ' . $tier['name']) ?>"><?= e($sponsors_section['button']) ?></a>
                     </li>
                 <?php } ?>
             </ul>

@@ -19,7 +19,7 @@ defined('ITFLOW_SITE') || exit;
                 <?php } ?>
             </div>
             <?php if (!empty($hero['hosting_line']) && hostingOn()) { ?>
-                <p class="hero-hosting"><a href="<?= sectionOn('start') ? '#start' : 'hosting.php?want=hosting' ?>"><i class="fas fa-cloud" aria-hidden="true"></i><?= e(hostingText($hero['hosting_line'])) ?></a></p>
+                <p class="hero-hosting"><a href="<?= sectionOn('start') ? '#start' : 'signup.php?want=hosting' ?>"><i class="fas fa-cloud" aria-hidden="true"></i><?= e(hostingText($hero['hosting_line'])) ?></a></p>
             <?php } ?>
         </div>
     </div>

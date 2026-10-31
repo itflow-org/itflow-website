@@ -46,7 +46,7 @@ Icons are [Font Awesome 6 free](https://fontawesome.com/search?o=r&m=free) class
 | `hosting` | The hosted card in "Get started", the hosting line under the top buttons, and hosting on the sign-up form |
 | `sponsors` | The sponsor logo wall and its menu link |
 | `sponsorship` | Sponsorship tiers on the homepage and on the sign-up form |
-| `signup` | The sign-up page itself. Off (or with both `hosting` and `sponsorship` off), `hosting.php` shows "Sign-ups are closed" and nothing links to it |
+| `signup` | The sign-up page itself. Off (or with both `hosting` and `sponsorship` off), `signup.php` shows "Sign-ups are closed" and nothing links to it |
 
 ### Required fields
 
@@ -58,10 +58,12 @@ The form doesn't ask for a time zone. The visitor's browser says which one they'
 
 ### Links that preselect the sign-up
 
-- `hosting.php?want=hosting` ticks hosted ITFlow
-- `hosting.php?want=hosting&seats=7` also fills in 7 technicians (kept between the included number and `max_seats`)
-- `hosting.php?want=sponsor` ticks sponsorship
-- `hosting.php?want=sponsor&tier=premier` ticks sponsorship and that tier (any key in `$sponsor_tiers`)
+- `signup.php?want=hosting` ticks hosted ITFlow
+- `signup.php?want=hosting&seats=7` also fills in 7 technicians (kept between the included number and `max_seats`)
+- `signup.php?want=sponsor` ticks sponsorship
+- `signup.php?want=sponsor&tier=premier` ticks sponsorship and that tier (any key in `$sponsor_tiers`)
+
+To share, `sponsor.php` is the short link to sponsoring (`sponsor.php?tier=premier` picks a tier too): it goes to the sign-up with sponsorship ticked while it's open, and otherwise to where the "Your logo here" tile points. `hosting.php`, the sign-up's old address, still works - it sends visitors on to `signup.php` with their `?want=` and the rest.
 
 On the form, any sponsor can choose to sponsor anonymously - no name, logo or website on itflow.org, everything else in their tier the same - and give as many forum usernames as they like for the forum hearts.
 
@@ -162,7 +164,9 @@ require __DIR__ . '/includes/footer.php';
 |---|---|
 | `config.php` | All content and settings |
 | `index.php` | The homepage - shows the parts in `includes/home/` that are switched on |
-| `hosting.php` | The hosted ITFlow and sponsorship sign-up, and the Pay step after it |
+| `signup.php` | The hosted ITFlow and sponsorship sign-up, and the Pay step after it |
+| `sponsor.php` | The short link to sponsoring - on to the sign-up, or to the "Your logo here" tile's address while sign-ups are closed |
+| `hosting.php` | The sign-up's old address - sends visitors on to `signup.php` |
 | `includes/bootstrap.php` | Loads the config; small helpers (`e()`, `money()`, `shot()`, `logoHtml()`, `sectionOn()` ...) |
 | `includes/header.php`, `includes/footer.php` | The top and bottom of every page |
 | `includes/home/*.php` | Each homepage section |
