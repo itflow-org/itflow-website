@@ -5,11 +5,15 @@
  * A sponsor without a logo yet shows as their name, with how long they have
  * sponsored under it when config.php says. Linked to ITFlow, the paying
  * sponsors with a place on the website are added to the wall by themselves
- * (itflowSponsors()). The anonymous sponsors get one tile, last.
+ * (itflowSponsors()). Logos are sized to the same weight (sponsorLogoSize()).
+ * The anonymous sponsors get one tile, then one invites the next sponsor - to
+ * the sign-up form while it is open, else to its 'url'.
  */
 defined('ITFLOW_SITE') || exit;
 $show_wall = sectionOn('sponsors') && $sponsors;
 $anonymous = $sponsors_section['anonymous'] ?? null;
+$join = $sponsors_section['join'] ?? null;
+$join_url = !$join ? '' : ((sectionOn('sponsorship') && signupOn()) ? 'hosting.php?want=sponsor' : (string) ($join['url'] ?? ''));
 $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
 ?>
 <section class="section sponsors" id="sponsors" aria-labelledby="sponsorsHeading">
@@ -24,11 +28,12 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
                     // A logo file here, or - for a sponsor from ITFlow - the picture ITFlow sent
                     $logo = !empty($sponsor['logo_data']) ? $sponsor['logo_data'] : (siteFileExists($sponsor['logo'] ?? '') ? asset($sponsor['logo']) : '');
                     $tag = !empty($sponsor['url']) ? 'a' : 'span';
-                    $since = sponsorSince($sponsor['since'] ?? ''); ?>
-                    <li class="sponsor<?= !empty($sponsor['featured']) ? ' sponsor-featured' : '' ?>">
-                        <<?= $tag ?> class="sponsor-tile"<?= $tag === 'a' ? ' href="' . e($sponsor['url']) . '" target="_blank" rel="noopener"' : '' ?>>
+                    $since = sponsorSince($sponsor['since'] ?? '');
+                    $size = $logo !== '' ? sponsorLogoSize(!empty($sponsor['logo_data']) ? $sponsor['logo_data'] : $sponsor['logo'], !empty($sponsor['featured'])) : null; ?>
+                    <li class="sponsor<?= !empty($sponsor['featured']) ? ' sponsor-featured' : '' ?><?= $logo !== '' ? ' sponsor-has-logo' : '' ?>">
+                        <<?= $tag ?> class="sponsor-tile"<?= $tag === 'a' ? ' href="' . e($sponsor['url']) . '" target="_blank" rel="noopener" title="' . e($sponsor['name']) . '"' : '' ?>>
                             <?php if ($logo !== '') { ?>
-                                <img src="<?= e($logo) ?>" alt="<?= e($sponsor['name']) ?>" loading="lazy">
+                                <img class="sponsor-logo" src="<?= e($logo) ?>" alt="<?= e($sponsor['name']) ?>"<?= $size ? ' width="' . $size[0] . '" height="' . $size[1] . '"' : '' ?> loading="lazy" decoding="async">
                             <?php } else { ?>
                                 <span class="sponsor-name"><?= e($sponsor['name']) ?></span>
                             <?php } ?>
@@ -47,6 +52,14 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
                                 <span class="sponsor-since"><?= e($since) ?></span>
                             <?php } ?>
                         </span>
+                    </li>
+                <?php } ?>
+                <?php if ($join_url !== '') { ?>
+                    <li class="sponsor sponsor-join">
+                        <a class="sponsor-tile" href="<?= e(siteHref($join_url)) ?>"<?= linkAttrs($join_url) ?>>
+                            <span class="sponsor-join-title"><?= e($join['title'] ?? '') ?></span>
+                            <span class="sponsor-join-text"><?= e($join['text'] ?? '') ?> <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                        </a>
                     </li>
                 <?php } ?>
             </ul>

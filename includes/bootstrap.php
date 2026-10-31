@@ -87,6 +87,40 @@ function sponsorSince($since) {
     return preg_match('/^\d{4}$/', $since) ? "Since $since" : '';
 }
 
+/*
+ * The size to show a sponsor's logo at, [width, height] - every logo given about
+ * the same area, so a wide wordmark and a square badge look the same weight, and
+ * kept inside the tile. A featured sponsor's is bigger. null when the picture's
+ * size can't be read (an SVG, say) - the stylesheet's limits apply then.
+ */
+function sponsorLogoSize($src, $featured = false) {
+    $src = (string) $src;
+    if (strncmp($src, 'data:', 5) === 0) {
+        $size = @getimagesizefromstring((string) base64_decode(substr($src, strpos($src, ',') + 1)));
+    } else {
+        $file = __DIR__ . '/../' . ltrim($src, '/');
+        $size = is_file($file) ? @getimagesize($file) : false;
+    }
+    if (!$size || $size[0] <= 0 || $size[1] <= 0) {
+        return null;
+    }
+    $ratio = $size[0] / $size[1];
+    [$area, $max_w, $max_h] = $featured ? [16000, 240, 72] : [11000, 196, 64];
+    $w = sqrt($area * $ratio);
+    $h = $w / $ratio;
+    $fit = min(1, $max_w / $w, $max_h / $h);
+    return [(int) round($w * $fit), (int) round($h * $fit)];
+}
+
+/* The first few sponsors' names, then how many more - "A, B, C and 9 more". */
+function sponsorNamesShort(array $sponsors, $show = 3) {
+    $names = sponsorNames($sponsors);
+    if (count($names) <= $show + 1) {
+        return listNames($names);
+    }
+    return implode(', ', array_slice($names, 0, $show)) . ' and ' . (count($names) - $show) . ' more';
+}
+
 /* "A", "A and B", "A, B and C". */
 function listNames(array $names) {
     if (count($names) <= 1) {

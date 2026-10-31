@@ -31,7 +31,6 @@ $sections = [
     'about'           => true,   // Timeline
     'team'            => true,   // Core team
     'signup'          => false,   // The sign-up page (hosting.php) itself
-    'footer_sponsors' => true,   // "Sponsored by ..." line in the footer
 ];
 
 // ---------------------------------------------------------------------------
@@ -196,10 +195,12 @@ $start = [
 
 // ---------------------------------------------------------------------------
 // Sponsors
-// Shown as a logo wall on the homepage, in the footer line, and on the sign-up page,
-// in this order - the longest-standing first.
+// Shown as a logo wall on the homepage, and named on the sign-up page, in this
+// order - the longest-standing first.
 // 'logo' is optional: a path under assets/img/sponsors/. Until the file exists,
 // the sponsor's name is shown as a text tile instead, so nothing ever breaks.
+// Logos are sized to look the same weight whatever their shape (see the
+// README in that folder).
 // 'since' is optional: the month they started, 'YYYY-MM' (or just 'YYYY'),
 // shown under the name as "Since Dec 2025".
 // 'featured' => true gives the sponsor a larger tile (e.g. Website tier sponsors).
@@ -222,9 +223,12 @@ $sponsors = [
 $sponsors_section = [
     'heading'       => 'Kept free by its sponsors',
     'text'          => 'ITFlow has no paid edition. These companies help pay for its development.',
-    // The last tile on the wall, for the sponsors who'd rather not be named - not
-    // in the footer line or the sign-up page's list. Leave out to show no such tile.
+    // A tile on the wall for the sponsors who'd rather not be named - not in the
+    // sign-up page's list. Leave out to show no such tile.
     'anonymous'     => ['text' => 'And many more who sponsor anonymously', 'since' => '2024'],
+    // The last tile, inviting the next sponsor. It opens the sign-up form while
+    // that is open, and 'url' while it isn't. Leave out to show no such tile.
+    'join'          => ['title' => 'Your logo here', 'text' => 'Become a sponsor', 'url' => 'https://services.itflow.org'],
     'tiers_heading' => 'Sponsor ITFlow',
     'tiers_text'    => 'Back the software your MSP runs on, and put your name in front of the people who use it.',
     'button'        => 'Become a sponsor',
@@ -348,7 +352,7 @@ $sponsor_tiers = [
         'icon'     => 'fas fa-globe',
         'includes' => 'github',
         'listed'   => true,
-        'perks'    => ['Your logo and link on itflow.org', 'Your name in the itflow.org footer'],
+        'perks'    => ['Your logo and link on itflow.org'],
     ],
     'custom' => [
         'name'     => 'Name Your Price',

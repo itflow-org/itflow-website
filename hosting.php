@@ -47,7 +47,7 @@ $app_domain     = $hosting['app_domain'];
 // Hosted sign-ups and sponsorships go into ITFlow when linked and it is taking them; otherwise they are emailed
 $linked         = $offer_hosting && itflowLinked() && !empty($hosting['open']);
 $linked_sponsor = $offer_sponsor && itflowLinked() && itflowSponsorOpen();
-$sponsor_names  = listNames(sponsorNames($sponsors));
+$sponsor_names  = sponsorNamesShort($sponsors);
 $notify_to      = (array) $signup['notify_to'];
 
 // ---------------------------------------------------------------------------

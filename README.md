@@ -18,7 +18,7 @@ Everything you'd change lives in **`config.php`**, top to bottom in page order:
 | "ITFlow in action" - the six steps and their screenshots | `$tour` |
 | "Get started" - host it yourself, hosted ITFlow, the demo | `$start` |
 | Sponsors, their logos and when each started (`'since' => 'YYYY-MM'`, shown as "Since Dec 2025") | `$sponsors`, longest-standing first (logo files go in `assets/img/sponsors/`). Linked to ITFlow, paying sponsors are added after these by themselves |
-| Sponsors section text, and the anonymous sponsors' tile (`'anonymous'`) | `$sponsors_section` |
+| Sponsors section text, the anonymous sponsors' tile (`'anonymous'`) and the "Become a sponsor" tile (`'join'`) | `$sponsors_section` |
 | About timeline | `$timeline` (oldest first) |
 | Core team | `$team` (photos go in `assets/img/team/`) |
 | Footer text, social buttons, link columns | `$footer` |
@@ -47,7 +47,6 @@ Icons are [Font Awesome 6 free](https://fontawesome.com/search?o=r&m=free) class
 | `sponsors` | The sponsor logo wall and its menu link |
 | `sponsorship` | Sponsorship tiers on the homepage and on the sign-up form |
 | `signup` | The sign-up page itself. Off (or with both `hosting` and `sponsorship` off), `hosting.php` shows "Sign-ups are closed" and nothing links to it |
-| `footer_sponsors` | The "Sponsored by ..." line in the footer |
 
 ### Required fields
 
@@ -104,7 +103,7 @@ $signup['itflow_secret'] = 'the secret shown there';
 
 Linked, the prices, technicians and regions come from ITFlow (its Hosted ITFlow products and its servers) instead of `$hosting`, and the tier prices from its sponsorship products instead of `$sponsor_tiers` - kept for 10 minutes, so they are set in one place. The tiers' keys here (`forum`, `github`, `website`, `custom`) must be the add-on's. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
 
-**Paying sponsors show by themselves.** Sponsors whose tier is `'listed'` (here, Website Company and Name Your Price, which includes it) are added to the logo wall and the footer line while they pay, after the sponsors in `$sponsors` - a name already there isn't shown twice. Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
+**Paying sponsors show by themselves.** Sponsors whose tier is `'listed'` (here, Website Company and Name Your Price, which includes it) are added to the logo wall while they pay, after the sponsors in `$sponsors` - a name already there isn't shown twice. Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
 
 If ITFlow can't be reached, or isn't taking sign-ups or sponsorships, the form emails the request like before - marked "NOT created" so someone adds it by hand - so no sign-up is lost.
 

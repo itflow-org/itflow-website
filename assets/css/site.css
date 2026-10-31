@@ -418,20 +418,35 @@ figcaption { margin-top: 12px; color: var(--muted); font-size: .94rem; line-heig
 .sponsor-featured { flex-grow: 1.5; }
 @media (max-width: 639px) { .sponsor { flex-basis: 140px; } }
 .sponsor-tile {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    min-height: 96px; height: 100%; padding: 16px 18px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    min-height: 112px; height: 100%; padding: 18px; text-align: center;
     border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
     color: var(--muted); text-decoration: none;
+    transition: border-color .2s, box-shadow .2s, transform .2s, color .2s;
 }
-a.sponsor-tile:hover { border-color: var(--line-strong); color: var(--ink); }
-.sponsor-tile img { max-height: 56px; max-width: 220px; width: auto; filter: grayscale(1); opacity: .8; transition: filter .2s, opacity .2s; }
-a.sponsor-tile:hover img { filter: none; opacity: 1; }
+a.sponsor-tile:hover, a.sponsor-tile:focus-visible {
+    border-color: var(--line-strong); color: var(--ink);
+    transform: translateY(-2px); box-shadow: 0 14px 28px -18px rgba(21, 33, 50, .35);
+}
+@media (prefers-reduced-motion: reduce) { .sponsor-tile, .sponsor-logo { transition: none; } a.sponsor-tile:hover, a.sponsor-tile:focus-visible { transform: none; } }
+/* Logos rest as one tone, like the names beside them, and come into colour on hover - in the dark, white */
+.sponsor-logo { display: block; max-width: 100%; height: auto; max-height: 72px; object-fit: contain; filter: brightness(0); opacity: .62; transition: filter .2s, opacity .2s; }
+a.sponsor-tile:hover .sponsor-logo, a.sponsor-tile:focus-visible .sponsor-logo { filter: none; opacity: 1; }
+@media (prefers-color-scheme: dark) {
+    .sponsor-logo, a.sponsor-tile:hover .sponsor-logo, a.sponsor-tile:focus-visible .sponsor-logo { filter: brightness(0) invert(1); }
+    .sponsor-logo { opacity: .7; }
+}
 .sponsor-name { font-size: 1.3rem; font-weight: 750; letter-spacing: -0.015em; text-wrap: balance; }
 .sponsor-featured .sponsor-name { font-size: 1.6rem; }
 .sponsor-since { font-size: .82rem; font-weight: 500; color: var(--muted); }
 .sponsor-anonymous { flex-grow: 2; }
-.sponsor-anonymous .sponsor-tile { border-style: dashed; background: transparent; }
+.sponsor-anonymous .sponsor-tile, .sponsor-join .sponsor-tile { border-style: dashed; background: transparent; }
 .sponsor-anonymous .sponsor-name { font-size: 1.05rem; font-weight: 650; letter-spacing: 0; }
+.sponsor-join-title { font-size: 1.05rem; font-weight: 650; color: var(--ink); }
+.sponsor-join-text { font-size: .9rem; font-weight: 600; color: var(--signal); white-space: nowrap; }
+.sponsor-join-text i { font-size: .8em; margin-left: 4px; transition: transform .2s; }
+a.sponsor-tile:hover .sponsor-join-text i { transform: translateX(3px); }
+.sponsor-join a.sponsor-tile:hover, .sponsor-join a.sponsor-tile:focus-visible { border-color: var(--signal); }
 
 .tiers-head { margin-top: 88px; max-width: 760px; }
 .tiers-head:first-child { margin-top: 0; }
@@ -510,7 +525,6 @@ a.sponsor-tile:hover img { filter: none; opacity: 1; }
 .footer-grid { display: grid; gap: 40px; }
 @media (min-width: 800px) { .footer-grid { grid-template-columns: 2fr repeat(3, 1fr); } }
 .footer-about p { margin-top: 16px; color: var(--night-muted); max-width: 46ch; font-size: .96rem; }
-.footer-sponsors span { white-space: nowrap; color: var(--night-ink); }
 .footer-social { display: flex; gap: 8px; margin-top: 20px; }
 .footer-social a {
     display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;
