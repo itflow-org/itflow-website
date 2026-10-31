@@ -39,8 +39,8 @@ $sections = [
 $site = [
     'name'        => 'ITFlow',
     'url'         => 'https://itflow.org',
-    'title'       => 'ITFlow - IT documentation, ticketing and billing for MSPs',
-    'description' => 'ITFlow is free, open-source client IT documentation, ticketing, billing and accounting for MSPs. Host it yourself, or let us host it.',
+    'title'       => 'ITFlow - The free, open-source PSA for MSPs',
+    'description' => 'ITFlow is the free, open-source PSA for MSPs, with IT documentation built in: ticketing, client documentation, contracts, billing and accounting in one place. Host it yourself, or let us host it.',
     'demo_url'    => 'https://demo.itflow.org',
     'install_url' => 'https://docs.itflow.org/installation',
     'docs_url'    => 'https://docs.itflow.org',
@@ -72,8 +72,8 @@ $nav = [
 // ---------------------------------------------------------------------------
 $hero = [
     'tag'     => 'Free and open source',
-    'heading' => 'Client IT documentation, ticketing and billing',
-    'text'    => 'Everything about your clients, their tickets and their invoices, in one place. Built for MSPs by people who run one. Host it yourself for free, or let us host it for you.',
+    'heading' => 'The PSA with IT documentation built in',
+    'text'    => 'Tickets, client documentation, contracts and billing for your MSP, in one place, with a portal for your clients. Built by people who run an MSP. Host it yourself for free, or let us host it for you.',
     'buttons' => [
         ['label' => 'Try the demo', 'href' => 'https://demo.itflow.org', 'style' => 'primary'],
         ['label' => 'Get started',  'href' => '#start',                  'style' => 'secondary'],
@@ -95,11 +95,11 @@ $hero = [
 // ---------------------------------------------------------------------------
 $features = [
     'heading' => 'Everything an MSP runs on',
-    'text'    => 'Documentation, tickets, billing and the books share one database, so each part knows what the others know.',
+    'text'    => 'Your PSA and your IT documentation in one: tickets, client documentation, billing and the books share one database, so each part knows what the others know.',
     'items'   => [
         ['icon' => 'fas fa-book',                'title' => 'Client documentation', 'text' => 'Contacts, locations, assets, networks, licenses, domains and documents, organized by client and linked together.'],
         ['icon' => 'fas fa-life-ring',           'title' => 'Support tickets',      'text' => 'Email to ticket, priorities, SLAs with business hours, templates, recurring tickets and a board view.'],
-        ['icon' => 'fas fa-file-invoice-dollar', 'title' => 'Invoicing',            'text' => 'Quotes, invoices and recurring invoices, with reminders, statements and online payment through Stripe.'],
+        ['icon' => 'fas fa-file-invoice-dollar', 'title' => 'Contracts and billing', 'text' => 'Contracts signed online, with prepaid hours and SLAs. Quotes, invoices and recurring invoices, paid online through Stripe.'],
         ['icon' => 'fas fa-key',                 'title' => 'Password management',  'text' => 'An encrypted vault for client passwords, with 2FA codes, rotation reminders and secure share links.'],
         ['icon' => 'fas fa-users',               'title' => 'Client portal',        'text' => 'Clients open and follow their tickets, see invoices and quotes, pay online and look up their devices.'],
         ['icon' => 'fas fa-scale-balanced',      'title' => 'Accounting',           'text' => 'Income, expenses, bank accounts and reconciliation, budgets, and profit and loss.'],
@@ -234,7 +234,7 @@ $sponsors_section = [
     // while that is open, and 'url' while it isn't. Leave out to show no such tile.
     'join'          => ['title' => 'Your logo here', 'text' => 'Become a premier sponsor', 'url' => 'https://services.itflow.org'],
     'tiers_heading' => 'Sponsor ITFlow',
-    'tiers_text'    => 'Back the software your MSP runs on, and put your name in front of the people who use it.',
+    'tiers_text'    => 'Back the PSA your MSP runs on, and put your name in front of the people who use it.',
     'button'        => 'Become a sponsor',
 ];
 
@@ -245,11 +245,11 @@ $timeline = [
     'heading' => 'Built inside a working MSP',
     'text'    => 'ITFlow started as the tool one MSP needed and couldn\'t find. It is still built by people who use it every day.',
     'entries' => [
-        ['date' => '2018',         'title' => 'An open-source MSP', 'text' => 'An MSP built on open-source software needs a system to run on, and starts writing ITFlow.'],
+        ['date' => '2018',         'title' => 'An open-source MSP', 'text' => 'An MSP built on open-source software needs a PSA to run on, and starts writing ITFlow.'],
         ['date' => 'March 2019',   'title' => 'On GitHub',          'text' => 'The code is published for anyone to use, change and improve.'],
         ['date' => 'May 2021',     'title' => 'The team grows',     'text' => 'Marcus and Andrei join the development team.'],
         ['date' => 'January 2025', 'title' => 'Stable releases',    'text' => 'ITFlow moves to regular stable releases.'],
-        ['date' => 'October 2026', 'title' => 'ITFlow neXt',        'text' => 'ITFlow completey redesigned!'],
+        ['date' => 'October 2026', 'title' => 'ITFlow neXt',        'text' => 'ITFlow completely redesigned!'],
     ],
 ];
 
@@ -286,7 +286,7 @@ $team = [
 // Footer
 // ---------------------------------------------------------------------------
 $footer = [
-    'text'   => 'Free, open-source documentation, ticketing and billing for MSPs. Licensed under the AGPL-3.0.',
+    'text'   => 'The free, open-source PSA for MSPs, with IT documentation built in. Licensed under the AGPL-3.0.',
     'social' => [
         ['icon' => 'fab fa-github',  'href' => 'https://github.com/itflow-org/itflow#readme',     'label' => 'GitHub'],
         ['icon' => 'fab fa-youtube', 'href' => 'https://www.youtube.com/@wrongecho5029/featured', 'label' => 'YouTube'],

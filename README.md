@@ -88,7 +88,7 @@ python3 tools/webp.py that-folder
 
 It writes both widths into `assets/img/shots/` and trims the scrollbar off the edge. It needs Python 3 and Pillow.
 
-`assets/img/og.png` is the picture shown when a link to the site is shared (1200 x 630). It mentions the $60 price, so make it again if that changes: `tools/og.html` is its source - open it on the site in a 1200 x 630 browser window and save a screenshot over `og.png`.
+`assets/img/og.png` is the picture shown when a link to the site is shared (1200 x 630). It mentions the $60 price, so make it again if that changes, or if the headline does: `tools/og.html` is its source - open it on the site in a 1200 x 630 browser window and save a screenshot over `og.png`.
 
 ## Sign-ups straight into ITFlow
 
