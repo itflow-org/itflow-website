@@ -25,12 +25,12 @@ $sections = [
     'features'        => true,   // The feature cards
     'tour'            => true,   // "ITFlow in action" - one ticket from the inbox to the bank
     'start'           => true,   // "Get started" - host it yourself, hosted, or the demo
-    'hosting'         => false,   // Hosted ITFlow: its card, the line under the top buttons, and hosting on the sign-up form
+    'hosting'         => true,   // Hosted ITFlow: its card, the line under the top buttons, and hosting on the sign-up form
     'sponsors'        => true,   // Sponsor logo wall on the homepage
     'sponsorship'     => true,   // Accept sponsorships: tiers on the homepage and on the sign-up form
     'about'           => true,   // Timeline
     'team'            => true,   // Core team
-    'signup'          => false,   // The sign-up page (hosting.php) itself
+    'signup'          => true,   // The sign-up page (hosting.php) itself
 ];
 
 // ---------------------------------------------------------------------------
@@ -65,7 +65,6 @@ $nav = [
     ['label' => 'About',    'href' => '#about',    'section' => 'about'],
     ['label' => 'Docs',     'href' => 'https://docs.itflow.org',     'external' => true],
     ['label' => 'Forum',    'href' => 'https://forum.itflow.org',    'external' => true],
-    ['label' => 'Sign-in',  'href' => 'https://portal.itflow.org',   'external' => true],
 ];
 
 // ---------------------------------------------------------------------------
@@ -178,7 +177,7 @@ $start = [
         'title'  => 'Hosted ITFlow',
         'note'   => '{included} technicians included, then {seat} a month for each one after that.',
         'text'   => 'Your own ITFlow, run by the people who build it. We keep it updated and backed up.',
-        'items'  => ['Your own instance, not a shared one', 'Nightly backups', 'Updates applied for you, security fixes straight away', 'Your own domain, or a free itflow.app address', 'Unlimited clients and portal contacts', 'Help from the ITFlow team'],
+        'items'  => ['Nightly backups', 'Updates applied for you, security fixes straight away', 'Your own domain, or a free itflow.app address', 'Unlimited clients and portal contacts', 'Help from the ITFlow team'],
         'button' => 'Get hosted ITFlow',
     ],
     'demo'    => [
