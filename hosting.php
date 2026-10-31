@@ -6,13 +6,13 @@
  * sponsorship go straight into our billing ITFlow when the form is linked to
  * it (includes/itflow_link.php): the customer gets a first invoice for each
  * with a Pay button, and their ITFlow is built - or their sponsorship starts,
- * with its white-label key - as soon as it is paid. Otherwise the submission
+ * with its tier's perks - as soon as it is paid. Otherwise the submission
  * is emailed with PHPMailer. Nothing is stored here. Prices, tiers, required
  * fields, mail settings and the on/off switches live in config.php (prices
  * and regions come from ITFlow when linked).
  *
  * Links from the homepage can preselect: hosting.php?want=hosting
- * or hosting.php?want=sponsor&tier=website
+ * or hosting.php?want=sponsor&tier=premier
  */
 
 require_once __DIR__ . '/includes/bootstrap.php';
@@ -196,7 +196,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tier_key = '';
     $sponsor_total = 0;
     $sponsor_url = '';
-    $forum_user = '';
+    $sponsor_display = '';
+    $sponsor_anonymous = false;
+    $forum_users = [];
     if ($want_sponsor) {
         $tier_key = field('sponsor_tier');
         if (!isset($sponsor_tiers[$tier_key])) {
@@ -210,16 +212,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-        $sponsor_url = line('sponsor_url', 500);
-        if ($sponsor_url !== '' && !preg_match('#^https?://#i', $sponsor_url)) {
-            $sponsor_url = 'https://' . $sponsor_url;
+        // Anonymous: not on itflow.org at all - so no name or website to show
+        $sponsor_anonymous = isset($_POST['sponsor_anonymous']);
+        if (!$sponsor_anonymous) {
+            $sponsor_display = line('sponsor_display', 100);
+            $sponsor_url = line('sponsor_url', 500);
+            if ($sponsor_url !== '' && !preg_match('#^https?://#i', $sponsor_url)) {
+                $sponsor_url = 'https://' . $sponsor_url;
+            }
+            if ($sponsor_url !== '' && !filter_var($sponsor_url, FILTER_VALIDATE_URL)) {
+                $errors[] = 'Enter your website as an address, like https://yourcompany.com.';
+            }
         }
-        if ($sponsor_url !== '' && !filter_var($sponsor_url, FILTER_VALIDATE_URL)) {
-            $errors[] = 'Enter your website as an address, like https://yourcompany.com.';
-        }
-        $forum_user = ltrim(line('sponsor_forum_user', 60), '@');
-        if ($forum_user !== '' && !preg_match('/^[A-Za-z0-9_.-]+$/', $forum_user)) {
-            $errors[] = 'A forum username has only letters, numbers, dots, dashes and underscores.';
+        [$forum_users, $forum_error] = forumUsernames(mb_substr(field('sponsor_forum_users'), 0, 2000));
+        if ($forum_error !== '') {
+            $errors[] = $forum_error;
         }
     }
 
@@ -300,9 +307,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ask['sponsor'] = [
                 'tier' => $tier_key,
                 'amount' => $sponsor_total,
-                'display_name' => line('sponsor_display', 100),
+                'anonymous' => $sponsor_anonymous ? 1 : 0,
+                'display_name' => $sponsor_display,
                 'url' => $sponsor_url,
-                'forum_user' => $forum_user,
+                'forum_users' => $forum_users,
+                'forum_user' => $forum_users[0] ?? '',  // the first, for an add-on that takes one
             ];
         }
         $answer = itflowAsk($ask, $status);
@@ -348,9 +357,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $body .= "SPONSORSHIP\n";
             $body .= "  Tier:         {$sponsor_tiers[$tier_key]['name']}\n";
             $body .= "  Price:        $" . number_format($sponsor_total, 2) . "/month\n";
-            $body .= "  Display name: " . (line('sponsor_display') ?: $company) . "\n";
-            $body .= "  Website:      " . ($sponsor_url ?: '-') . "\n";
-            $body .= "  Forum user:   " . ($forum_user ?: '-') . "\n";
+            if ($sponsor_anonymous) {
+                $body .= "  Anonymous:    yes - not shown on itflow.org\n";
+            } else {
+                $body .= "  Display name: " . ($sponsor_display ?: $company) . "\n";
+                $body .= "  Website:      " . ($sponsor_url ?: '-') . "\n";
+            }
+            $body .= "  Forum users:  " . ($forum_users ? implode(', ', $forum_users) : '-') . "\n";
             $body .= $created_sponsor
                 ? "  In ITFlow:    signed up, invoice {$created_sponsor['invoice']['number']} sent - starts once it is paid\n\n"
                 : ($linked_sponsor ? "  In ITFlow:    NOT created - ITFlow could not be reached. Add it by hand.\n\n" : "\n");
@@ -415,7 +428,7 @@ if ($offer_hosting && $offer_sponsor) {
 } else {
     $page_heading = 'Sponsor ITFlow';
     $page_lede = $linked_sponsor
-        ? 'Help keep ITFlow free and open source. Your sponsorship starts, white-label key and all, as soon as you pay your first invoice.'
+        ? 'Help keep ITFlow free and open source. Your sponsorship starts as soon as you pay your first invoice.'
         : 'Help keep ITFlow free and open source. Nothing is charged until we have confirmed everything with you.';
 }
 
@@ -427,7 +440,21 @@ if ($created && !empty($created['invoice']['pay_url'])) {
 if ($created_sponsor && !empty($created_sponsor['invoice']['pay_url'])) {
     $to_pay[] = ['what' => 'Sponsorship', 'detail' => $created_sponsor['tier_name'] ?? '', 'icon' => 'fas fa-hand-holding-heart', 'invoice' => $created_sponsor['invoice']];
 }
-$sponsor_listed = $created_sponsor && tierListed($created_sponsor['tier'] ?? '', $sponsor_tiers);
+// What a new sponsorship brings once its invoice is paid, for the thank-you
+$sponsor_starts = [];
+if ($created_sponsor) {
+    $created_tier = isset($sponsor_tiers[$created_sponsor['tier'] ?? '']) ? $created_sponsor['tier'] : $tier_key;
+    $created_show = sponsorShow(['tier' => $created_tier]);
+    if (tierHas($created_tier, 'whitelabel', $sponsor_tiers)) {
+        $sponsor_starts[] = 'we email <strong>' . e($primary_email) . '</strong> your white-label key';
+    }
+    if (!$sponsor_anonymous && $created_show === 'name') {
+        $sponsor_starts[] = 'your name goes up on itflow.org';
+    }
+    if ($forum_users) {
+        $sponsor_starts[] = 'the heart goes next to ' . e(listNames($forum_users)) . ' on the forum';
+    }
+}
 
 $page_title = $page_heading . ' - ITFlow';
 $page_description = $page_lede;
@@ -455,7 +482,7 @@ $step = 0;
             <?php } ?>
         <?php } ?>
         <?php if ($created_sponsor) { ?>
-            <p>Your sponsorship starts as soon as invoice <?= e($created_sponsor['invoice']['number'] ?? '') ?> is paid: we email <strong><?= e($primary_email) ?></strong> your white-label key<?= $sponsor_listed ? ', and you show on itflow.org - send us your logo by replying to that email' : '' ?>.</p>
+            <p>Your sponsorship starts as soon as invoice <?= e($created_sponsor['invoice']['number'] ?? '') ?> is paid<?= $sponsor_starts ? ': ' . listNames($sponsor_starts) : '' ?>.<?= !$sponsor_anonymous && $created_show !== 'name' ? ' Reply to our email with your logo and we put it up on itflow.org.' : '' ?></p>
         <?php } ?>
 
         <?php if (count($to_pay) === 1) { ?>
@@ -591,7 +618,7 @@ $step = 0;
                 <div class="choices tier-choices">
                     <?php foreach ($sponsor_tiers as $k => $t) { ?>
                         <label class="choice tier-choice">
-                            <input type="radio" class="tier-radio" name="sponsor_tier" value="<?= e($k) ?>" data-price="<?= (int) $t['price'] ?>" <?= !empty($t['custom']) ? 'data-custom="1"' : '' ?> required <?= checked('sponsor_tier', $k, $k === $default_tier) ?>>
+                            <input type="radio" class="tier-radio" name="sponsor_tier" value="<?= e($k) ?>" data-price="<?= (int) $t['price'] ?>" data-show-as="<?= e(sponsorShow(['tier' => $k])) ?>" <?= !empty($t['custom']) ? 'data-custom="1"' : '' ?> required <?= checked('sponsor_tier', $k, $k === $default_tier) ?>>
                             <?= tierHead($t) ?>
                             <?= tierPerks($t, $sponsor_tiers) ?>
                             <?php if (!empty($t['custom'])) { ?>
@@ -605,22 +632,31 @@ $step = 0;
                     <?php } ?>
                 </div>
                 <p class="feedback" id="tierFeedback">Choose a sponsorship tier.</p>
+                <?php // Name or logo in the hints below, for the tier chosen - the script keeps them in step
+                $form_tier = $_SERVER['REQUEST_METHOD'] === 'POST' ? field('sponsor_tier') : $default_tier;
+                $form_logo = isset($sponsor_tiers[$form_tier]) && sponsorShow(['tier' => $form_tier]) !== 'name'; ?>
+                <label class="choice sponsor-anonymous-choice">
+                    <input type="checkbox" name="sponsor_anonymous" value="1" <?= checked('sponsor_anonymous') ?>>
+                    <strong>Sponsor anonymously</strong>
+                    <small>Leave your name and logo off itflow.org - you join the many who sponsor anonymously. Everything else in your tier stays the same.</small>
+                </label>
                 <div class="fields" style="margin-top: 22px">
-                    <div class="span-6">
+                    <div class="span-6" data-shown-name>
                         <label class="label" for="sponsor_display">Name to show <span class="label-light">if it isn't your company name</span></label>
                         <input type="text" class="input" id="sponsor_display" name="sponsor_display" value="<?= old('sponsor_display') ?>" maxlength="100">
-                        <p class="hint">On itflow.org and your white-label key. For a logo, we'll ask you for it by email.</p>
+                        <p class="hint">How we name you on itflow.org.<span data-for-logo<?= $form_logo ? '' : ' hidden' ?>> We'll ask you for your logo by email.</span></p>
                     </div>
-                    <div class="span-6">
+                    <div class="span-6" data-shown-name>
                         <label class="label" for="sponsor_url">Your website <span class="label-light">optional</span></label>
                         <!-- Text, not url: people type yourcompany.com, and the https:// is added for them -->
                         <input type="text" inputmode="url" class="input" id="sponsor_url" name="sponsor_url" value="<?= old('sponsor_url') ?>" maxlength="500" placeholder="yourcompany.com" autocomplete="url" autocapitalize="off" spellcheck="false">
-                        <p class="hint">Where your name on itflow.org links to.</p>
+                        <p class="hint">Where your <span data-for-name<?= $form_logo ? ' hidden' : '' ?>>name</span><span data-for-logo<?= $form_logo ? '' : ' hidden' ?>>logo</span> on itflow.org links to.</p>
                     </div>
-                    <div class="span-6">
-                        <label class="label" for="sponsor_forum_user">Forum username <span class="label-light">optional</span></label>
-                        <input type="text" class="input" id="sponsor_forum_user" name="sponsor_forum_user" value="<?= old('sponsor_forum_user') ?>" maxlength="60" pattern="@?[A-Za-z0-9_.\-]+" title="Letters, numbers, dots, dashes and underscores" autocapitalize="off" spellcheck="false">
-                        <p class="hint">For the heart next to your name on the ITFlow forum.</p>
+                    <div>
+                        <label class="label" for="sponsor_forum_users">Forum usernames <span class="label-light">optional</span></label>
+                        <!-- As many as they like: commas, spaces or new lines between them, an @ in front or not -->
+                        <input type="text" class="input" id="sponsor_forum_users" name="sponsor_forum_users" value="<?= old('sponsor_forum_users') ?>" maxlength="2000" placeholder="jsmith, alex.r, sam_t" pattern="[@A-Za-z0-9_.,;\s\-]*" title="Usernames have only letters, numbers, dots, dashes and underscores - put commas between them" autocapitalize="off" autocomplete="off" spellcheck="false">
+                        <p class="hint">Everyone on your team who's on the ITFlow forum - each gets a heart next to their name. Put commas between them.</p>
                     </div>
                 </div>
             </div>
@@ -724,12 +760,12 @@ $step = 0;
                 $ticked_sponsor = $_SERVER['REQUEST_METHOD'] === 'POST' ? isset($_POST['want_sponsor']) : $default_sponsor;
                 $note = $ticked_hosting && $ticked_sponsor ? 'both' : ($ticked_sponsor ? 'sponsor' : 'hosting'); ?>
                 <p class="summary-note" data-linked-note data-note="hosting"<?= $note === 'hosting' ? '' : ' hidden' ?>>Hosted ITFlow: your first invoice comes next, and your ITFlow is built as soon as it is paid.</p>
-                <p class="summary-note" data-linked-note data-note="sponsor"<?= $note === 'sponsor' ? '' : ' hidden' ?>>Sponsorship: your first invoice comes next, and your white-label key as soon as it is paid.</p>
+                <p class="summary-note" data-linked-note data-note="sponsor"<?= $note === 'sponsor' ? '' : ' hidden' ?>>Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
                 <p class="summary-note" data-linked-note data-note="both"<?= $note === 'both' ? '' : ' hidden' ?>>A first invoice for each comes next. Your ITFlow is built, and your sponsorship starts, as soon as each is paid.</p>
             <?php } elseif ($linked) { ?>
                 <p class="summary-note" data-linked-note>Hosted ITFlow: your first invoice comes next, and your ITFlow is built as soon as it is paid.</p>
             <?php } elseif ($linked_sponsor) { ?>
-                <p class="summary-note" data-linked-note>Sponsorship: your first invoice comes next, and your white-label key as soon as it is paid.</p>
+                <p class="summary-note" data-linked-note>Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
             <?php } else { ?>
                 <p class="summary-note">Nothing is charged now. We'll confirm everything with you and send your first invoice.</p>
             <?php } ?>
@@ -842,6 +878,14 @@ $step = 0;
         var tier = form.querySelector('[name=sponsor_tier]:checked');
         if (sponsor) {
             showBlock($('[data-custom-amount]'), !!(tier && tier.getAttribute('data-custom')));
+            // Anonymous: no name or website to ask for. The hints say name or logo, for the tier.
+            var anonymous = $('[name=sponsor_anonymous]');
+            form.querySelectorAll('[data-shown-name]').forEach(function (el) {
+                showBlock(el, !(anonymous && anonymous.checked));
+            });
+            var logo = !!tier && tier.getAttribute('data-show-as') !== 'name';
+            form.querySelectorAll('[data-for-logo]').forEach(function (el) { el.hidden = !logo; });
+            form.querySelectorAll('[data-for-name]').forEach(function (el) { el.hidden = logo; });
         }
 
         // Rules the browser can't express on its own

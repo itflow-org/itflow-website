@@ -1,20 +1,24 @@
 <?php
 /*
- * Sponsors - the premier sponsors' tiles and the other sponsors' names
- * ($sponsors, $sponsors_section), and the tiers ($sponsor_tiers, when
- * sponsorship is on and the sign-up page is open).
- * A premier sponsor (sponsorIsPremier()) gets a tile with their logo, sized to
- * the same weight as the others (sponsorLogoSize()) - or their name until the
- * logo is here - and when they started. The last tile invites the next one: to
- * the sign-up form while it is open, else to its 'url'. Every other sponsor is
- * their name, linking to their website, then a line for the anonymous ones.
- * Linked to ITFlow, the paying sponsors with a place on the website are added
- * as premier sponsors by themselves (itflowSponsors()).
+ * Sponsors ($sponsors, $sponsors_section) by how their tier shows them
+ * (sponsorShow()): premier sponsors a large tile each with their logo, company
+ * sponsors a smaller one, supporters their name linking to their website - then
+ * a line for the anonymous ones. Logos are sized to the same weight
+ * (sponsorLogoSize()); a tile shows the name until its logo is here. The last
+ * premier tile invites the next one: to the sign-up form while it is open, else
+ * to its 'url'. Then the tiers ($sponsor_tiers, when sponsorship is on and the
+ * sign-up page is open). Linked to ITFlow, the paying sponsors are added by
+ * themselves (itflowSponsors()).
  */
 defined('ITFLOW_SITE') || exit;
 $show_wall = sectionOn('sponsors') && $sponsors;
-$premier = array_values(array_filter($sponsors, 'sponsorIsPremier'));
-$listed = array_values(array_filter($sponsors, function ($sponsor) { return !sponsorIsPremier($sponsor); }));
+$by_show = ['large' => [], 'logo' => [], 'name' => []];
+foreach ($sponsors as $sponsor) {
+    $by_show[sponsorShow($sponsor)][] = $sponsor;
+}
+$premier = $by_show['large'];
+$company = $by_show['logo'];
+$listed = $by_show['name'];
 $anonymous = $sponsors_section['anonymous'] ?? null;
 $anonymous_since = sponsorSince($anonymous['since'] ?? '');
 $join = $sponsors_section['join'] ?? null;
@@ -33,24 +37,8 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
                     <h3 class="sponsor-group-title"><?= e($sponsors_section['premier_title'] ?? 'Premier sponsors') ?></h3>
                     <ul class="sponsor-wall">
                         <?php foreach ($premier as $sponsor) {
-                            // A logo file here, or - for a sponsor from ITFlow - the picture ITFlow sent
-                            $logo = !empty($sponsor['logo_data']) ? $sponsor['logo_data'] : (siteFileExists($sponsor['logo'] ?? '') ? asset($sponsor['logo']) : '');
-                            $tag = !empty($sponsor['url']) ? 'a' : 'span';
-                            $since = sponsorSince($sponsor['since'] ?? '');
-                            $size = $logo !== '' ? sponsorLogoSize(!empty($sponsor['logo_data']) ? $sponsor['logo_data'] : $sponsor['logo']) : null; ?>
-                            <li class="sponsor<?= $logo !== '' ? ' sponsor-has-logo' : '' ?>">
-                                <<?= $tag ?> class="sponsor-tile"<?= $tag === 'a' ? ' href="' . e($sponsor['url']) . '" target="_blank" rel="noopener" title="' . e($sponsor['name']) . '"' : '' ?>>
-                                    <?php if ($logo !== '') { ?>
-                                        <img class="sponsor-logo" src="<?= e($logo) ?>" alt="<?= e($sponsor['name']) ?>"<?= $size ? ' width="' . $size[0] . '" height="' . $size[1] . '"' : '' ?> loading="lazy" decoding="async">
-                                    <?php } else { ?>
-                                        <span class="sponsor-name"><?= e($sponsor['name']) ?></span>
-                                    <?php } ?>
-                                    <?php if ($since !== '') { ?>
-                                        <span class="sponsor-since"><?= e($since) ?></span>
-                                    <?php } ?>
-                                </<?= $tag ?>>
-                            </li>
-                        <?php } ?>
+                            echo sponsorTileHtml($sponsor, 'large');
+                        } ?>
                         <?php if ($join_url !== '') { ?>
                             <li class="sponsor sponsor-join">
                                 <a class="sponsor-tile" href="<?= e(siteHref($join_url)) ?>"<?= linkAttrs($join_url) ?>>
@@ -62,9 +50,19 @@ $show_tiers = sectionOn('sponsorship') && signupOn() && $sponsor_tiers;
                     </ul>
                 </div>
             <?php } ?>
+            <?php if ($company) { ?>
+                <div class="sponsor-group">
+                    <h3 class="sponsor-group-title"><?= e($sponsors_section['company_title'] ?? 'Company sponsors') ?></h3>
+                    <ul class="sponsor-wall sponsor-wall-company">
+                        <?php foreach ($company as $sponsor) {
+                            echo sponsorTileHtml($sponsor, 'logo');
+                        } ?>
+                    </ul>
+                </div>
+            <?php } ?>
             <?php if ($listed || !empty($anonymous['text'])) { ?>
                 <div class="sponsor-group">
-                    <h3 class="sponsor-group-title"><?= e($sponsors_section['list_title'] ?? 'Sponsors') ?></h3>
+                    <h3 class="sponsor-group-title"><?= e($sponsors_section['list_title'] ?? 'Supporters') ?></h3>
                     <?php if ($listed) { ?>
                         <ul class="sponsor-list">
                             <?php foreach ($listed as $sponsor) {

@@ -17,13 +17,13 @@ Everything you'd change lives in **`config.php`**, top to bottom in page order:
 | "Everything an MSP runs on" - the feature cards (icon, title, a sentence or two each) | `$features` |
 | "ITFlow in action" - the six steps and their screenshots | `$tour` |
 | "Get started" - host it yourself, hosted ITFlow, the demo | `$start` |
-| Sponsors, longest-standing first: `'premier' => true` for a tile with their logo (files go in `assets/img/sponsors/`), the rest listed by name; `'since' => 'YYYY-MM'` when each started | `$sponsors`. Linked to ITFlow, paying sponsors with a place on the website are added as premier sponsors by themselves |
-| Sponsors section text, the two headings, the anonymous sponsors' line (`'anonymous'`) and the "Your logo here" tile (`'join'`) | `$sponsors_section` |
+| Sponsors, longest-standing first: `'tier'` is how each shows - `'premier'` a large tile with their logo, `'company'` a smaller logo tile (logo files go in `assets/img/sponsors/`), no tier (a supporter) their name; `'since' => 'YYYY-MM'` when each started | `$sponsors`. Linked to ITFlow, paying sponsors are added by themselves |
+| Sponsors section text, the three headings, the anonymous sponsors' line (`'anonymous'`) and the "Your logo here" tile (`'join'`) | `$sponsors_section` |
 | About timeline | `$timeline` (oldest first) |
 | Core team | `$team` (photos go in `assets/img/team/`) |
 | Footer text, social buttons, link columns | `$footer` |
 | Hosting prices, regions and the fallback time zone | `$hosting` |
-| Sponsorship tiers: name, price, icon, perks, the tier each one builds on, and `'listed'` for a place on itflow.org | `$sponsor_tiers` |
+| Sponsorship tiers: name, price, icon, perks, the tier each one builds on, how its sponsors show on itflow.org (`'show'` - `'name'`, `'logo'` or `'large'`) and `'whitelabel'` for a white-label key | `$sponsor_tiers` |
 | Sign-up recipients and required fields | `$signup` |
 | Mail server | `$mail` |
 
@@ -61,7 +61,9 @@ The form doesn't ask for a time zone. The visitor's browser says which one they'
 - `hosting.php?want=hosting` ticks hosted ITFlow
 - `hosting.php?want=hosting&seats=7` also fills in 7 technicians (kept between the included number and `max_seats`)
 - `hosting.php?want=sponsor` ticks sponsorship
-- `hosting.php?want=sponsor&tier=website` ticks sponsorship and that tier (any key in `$sponsor_tiers`)
+- `hosting.php?want=sponsor&tier=premier` ticks sponsorship and that tier (any key in `$sponsor_tiers`)
+
+On the form, any sponsor can choose to sponsor anonymously - no name, logo or website on itflow.org, everything else in their tier the same - and give as many forum usernames as they like for the forum hearts.
 
 ## Screenshots
 
@@ -91,7 +93,7 @@ It writes both widths into `assets/img/shots/` and trims the scrollbar off the e
 Link the form to the billing ITFlow's Hosting add-on and sign-ups need nobody:
 
 - **Hosted ITFlow** - the client, the recurring invoice and the first invoice are made there, and the customer goes straight to a Pay button. Their ITFlow is built as soon as that invoice is paid, and they get an email with a link to set their password.
-- **Sponsorships** - the same: a recurring invoice for the tier and the first invoice with its Pay button. Once it is paid, the sponsor is emailed their white-label key, and staff get a to-do for the forum heart and the GitHub README.
+- **Sponsorships** - the same: a recurring invoice for the tier and the first invoice with its Pay button. Once it is paid, the sponsor is emailed their white-label key (on a tier with one), and staff get a to-do for the forum hearts. Anonymous sponsors and every forum username go along with it.
 - **Both together** - one client, an invoice each, and a Pay button each.
 
 Put the two lines from Hosting > Settings in that ITFlow into `config.local.php`:
@@ -101,9 +103,9 @@ $signup['itflow_url']    = 'https://billing.example.com';
 $signup['itflow_secret'] = 'the secret shown there';
 ```
 
-Linked, the prices, technicians and regions come from ITFlow (its Hosted ITFlow products and its servers) instead of `$hosting`, and the tier prices from its sponsorship products instead of `$sponsor_tiers` - kept for 10 minutes, so they are set in one place. The tiers' keys here (`forum`, `github`, `website`, `custom`) must be the add-on's. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
+Linked, the prices, technicians and regions come from ITFlow (its Hosted ITFlow products and its servers) instead of `$hosting`, and the tier prices from its sponsorship products instead of `$sponsor_tiers` - kept for 10 minutes, so they are set in one place. The tiers' keys here (`supporter`, `company`, `premier`) must be the add-on's. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
 
-**Paying sponsors show by themselves.** Sponsors whose tier is `'listed'` (here, Website Company and Name Your Price, which includes it) are added to the premier sponsors while they pay, after the sponsors in `$sponsors` - a name already there isn't shown twice. Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
+**Paying sponsors show by themselves.** Sponsors who aren't anonymous are added while they pay, by their tier - premier sponsors' large logos, company sponsors' logos, supporters' names - after the sponsors in `$sponsors`; a name already there isn't shown twice. (When ITFlow doesn't say which tier, a featured sponsor shows as premier and the rest as company sponsors.) Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
 
 If ITFlow can't be reached, or isn't taking sign-ups or sponsorships, the form emails the request like before - marked "NOT created" so someone adds it by hand - so no sign-up is lost.
 

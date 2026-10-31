@@ -196,19 +196,21 @@ $start = [
 // ---------------------------------------------------------------------------
 // Sponsors
 // Shown on the homepage, and named on the sign-up page, in this order - the
-// longest-standing first. Two kinds:
-// - 'premier' => true: a tile of their own with their logo and when they started.
-//   'logo' is a path under assets/img/sponsors/ - until the file exists, their
-//   name shows on the tile instead. Logos are sized to look the same weight
-//   whatever their shape (see the README in that folder).
-// - the rest: their name, linking to their website, in the list below the tiles.
-// 'since' is the month they started, 'YYYY-MM' (or just 'YYYY') - "Since Dec 2025"
-// on a premier tile, and on hovering a name in the list.
+// longest-standing first. 'tier' is their key in $sponsor_tiers below, and the
+// tier's 'show' says how they appear:
+// - 'large' (Premier Sponsor): a large tile with their logo and when they started
+// - 'logo' (Company Sponsor): a smaller tile with their logo
+// - 'name' (Supporter - and anyone without a 'tier'): their name, linking to their website
+// 'logo' is a path under assets/img/sponsors/ - until the file exists, their name
+// shows on the tile instead. Logos are sized to look the same weight whatever their
+// shape (see the README in that folder).
+// 'since' is the month they started, 'YYYY-MM' (or just 'YYYY') - shown on the tiles,
+// and on hovering a name.
 // ---------------------------------------------------------------------------
 $sponsors = [
-    ['name' => 'PittPC',                  'premier' => true, 'logo' => 'assets/img/sponsors/pittpc.svg',        'url' => 'https://pittpc.com'],
-    ['name' => 'DigiBandit',              'premier' => true, 'logo' => 'assets/img/sponsors/digibandit.png',    'url' => 'https://dbits.ca',             'since' => '2025-05'],
-    ['name' => 'Mountaineer IT',          'premier' => true, 'logo' => 'assets/img/sponsors/mountaineerit.png', 'url' => 'https://mountaineerit.com',    'since' => '2025-12'],
+    ['name' => 'PittPC',                  'tier' => 'premier', 'logo' => 'assets/img/sponsors/pittpc.svg',        'url' => 'https://pittpc.com'],
+    ['name' => 'DigiBandit',              'tier' => 'premier', 'logo' => 'assets/img/sponsors/digibandit.png',    'url' => 'https://dbits.ca',             'since' => '2025-05'],
+    ['name' => 'Mountaineer IT',          'tier' => 'premier', 'logo' => 'assets/img/sponsors/mountaineerit.png', 'url' => 'https://mountaineerit.com',    'since' => '2025-12'],
     ['name' => 'F1 for Help',             'url' => 'https://f1forhelp.net',          'since' => '2024-01'],
     ['name' => 'CompuMatter',             'url' => 'https://compumatter.com',        'since' => '2024-02'],
     ['name' => 'DINadmin ApS',            'url' => 'https://dinadmin.dk',            'since' => '2025-03'],
@@ -224,7 +226,8 @@ $sponsors_section = [
     'heading'       => 'Kept free by its sponsors',
     'text'          => 'ITFlow has no paid edition. These companies help pay for its development.',
     'premier_title' => 'Premier sponsors',
-    'list_title'    => 'Sponsors',
+    'company_title' => 'Company sponsors',
+    'list_title'    => 'Supporters',
     // After the list of names, for the sponsors who'd rather not be named - not
     // in the sign-up page's list. Leave out to show no such line.
     'anonymous'     => ['text' => 'And many more who sponsor anonymously', 'since' => '2024'],
@@ -330,39 +333,37 @@ $hosting = [
 // Sponsorship tiers - monthly. 'custom' => true lets them name an amount >= price.
 // 'includes' names the tier whose perks this one also gets ("Everything in X, plus").
 // 'icon' is a Font Awesome class, shown in the circle at the top of the tier's card.
-// 'listed' => true: the tier (and every tier that includes it) shows on itflow.org.
+// 'show' is how the tier's sponsors appear on itflow.org - 'name', 'logo' or 'large'.
+// 'whitelabel' => true: the tier (and every tier that includes it) gets a white-label key.
+// Any tier's sponsor can choose to stay anonymous - not shown on itflow.org at all.
 // Linked to ITFlow, the keys must match the Hosting add-on's tiers - its prices are used,
-// and it sends paying listed sponsors to the logo wall by itself.
+// and it sends paying sponsors to the homepage by itself.
 // ---------------------------------------------------------------------------
 $sponsor_tiers = [
-    'forum' => [
-        'name'  => 'Forum User Sponsor',
+    'supporter' => [
+        'name'  => 'Supporter',
         'price' => 60,
-        'icon'  => 'fab fa-discourse',
-        'perks' => ['Support perks', 'A heart next to your ITFlow forum user', 'White label - no "Powered by ITFlow"'],
+        'icon'  => 'fas fa-heart',
+        'show'  => 'name',
+        'perks' => ['Your name on itflow.org', 'A heart next to your name on the ITFlow forum'],
     ],
-    'github' => [
-        'name'     => 'GitHub Company Sponsor',
-        'price'    => 120,
-        'icon'     => 'fab fa-github',
-        'includes' => 'forum',
-        'perks'    => ['Your company in the ITFlow GitHub README'],
+    'company' => [
+        'name'       => 'Company Sponsor',
+        'price'      => 120,
+        'icon'       => 'fas fa-building',
+        'includes'   => 'supporter',
+        'show'       => 'logo',
+        'whitelabel' => true,
+        'perks'      => ['White label - no "Powered by ITFlow"', 'Your company logo on itflow.org'],
     ],
-    'website' => [
-        'name'     => 'Website Company Sponsor',
+    'premier' => [
+        'name'     => 'Premier Sponsor',
         'price'    => 200,
-        'icon'     => 'fas fa-globe',
-        'includes' => 'github',
-        'listed'   => true,
-        'perks'    => ['Your logo and link on itflow.org'],
-    ],
-    'custom' => [
-        'name'     => 'Name Your Price',
-        'price'    => 200,
-        'icon'     => 'fas fa-heart',
-        'includes' => 'website',
-        'perks'    => ['You choose the monthly amount'],
+        'icon'     => 'fas fa-crown',
+        'includes' => 'company',
+        'show'     => 'large',
         'custom'   => true,
+        'perks'    => ['A large company logo on itflow.org', 'An invitation to our biannual online meetings'],
     ],
 ];
 

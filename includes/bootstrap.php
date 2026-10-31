@@ -87,9 +87,15 @@ function sponsorSince($since) {
     return preg_match('/^\d{4}$/', $since) ? "Since $since" : '';
 }
 
-/* A premier sponsor - a tile with their logo - rather than a name in the list. ITFlow's 'featured' counts. */
-function sponsorIsPremier(array $sponsor) {
-    return !empty($sponsor['premier']) || !empty($sponsor['featured']);
+/*
+ * How a sponsor appears - 'large' (a large tile with their logo), 'logo' (a smaller
+ * tile) or 'name' (their name in the list) - from their tier's 'show'. One with no
+ * tier, or a tier not in $sponsor_tiers, is a name.
+ */
+function sponsorShow(array $sponsor) {
+    global $sponsor_tiers;
+    $show = $sponsor_tiers[$sponsor['tier'] ?? '']['show'] ?? 'name';
+    return in_array($show, ['large', 'logo'], true) ? $show : 'name';
 }
 
 /*
@@ -98,7 +104,7 @@ function sponsorIsPremier(array $sponsor) {
  * kept inside the tile. An SVG's comes from its width and height, or its viewBox.
  * null when the picture's size can't be read - the stylesheet's limits apply then.
  */
-function sponsorLogoSize($src) {
+function sponsorLogoSize($src, $show = 'large') {
     $src = (string) $src;
     if (strncmp($src, 'data:', 5) === 0) {
         $bytes = (string) base64_decode(substr($src, strpos($src, ',') + 1));
@@ -118,11 +124,35 @@ function sponsorLogoSize($src) {
         return null;
     }
     $ratio = $size[0] / $size[1];
-    [$area, $max_w, $max_h] = [15000, 230, 76];
+    [$area, $max_w, $max_h] = $show === 'large' ? [15000, 230, 76] : [8000, 160, 52];
     $w = sqrt($area * $ratio);
     $h = $w / $ratio;
     $fit = min(1, $max_w / $w, $max_h / $h);
     return [(int) round($w * $fit), (int) round($h * $fit)];
+}
+
+/*
+ * A sponsor's tile on the homepage - their logo (a file here, or the picture ITFlow
+ * sent), or their name until it's here, and when they started - linking to their
+ * website. $show is 'large' or 'logo'.
+ */
+function sponsorTileHtml(array $sponsor, $show) {
+    $logo = !empty($sponsor['logo_data']) ? $sponsor['logo_data'] : (siteFileExists($sponsor['logo'] ?? '') ? asset($sponsor['logo']) : '');
+    $tag = !empty($sponsor['url']) ? 'a' : 'span';
+    $since = sponsorSince($sponsor['since'] ?? '');
+    $html = '<li class="sponsor' . ($logo !== '' ? ' sponsor-has-logo' : '') . '">'
+        . "<$tag class=\"sponsor-tile\"" . ($tag === 'a' ? ' href="' . e($sponsor['url']) . '" target="_blank" rel="noopener" title="' . e($sponsor['name']) . '"' : '') . '>';
+    if ($logo !== '') {
+        $size = sponsorLogoSize(!empty($sponsor['logo_data']) ? $sponsor['logo_data'] : $sponsor['logo'], $show);
+        $html .= '<img class="sponsor-logo" src="' . e($logo) . '" alt="' . e($sponsor['name']) . '"'
+            . ($size ? ' width="' . $size[0] . '" height="' . $size[1] . '"' : '') . ' loading="lazy" decoding="async">';
+    } else {
+        $html .= '<span class="sponsor-name">' . e($sponsor['name']) . '</span>';
+    }
+    if ($since !== '') {
+        $html .= '<span class="sponsor-since">' . e($since) . '</span>';
+    }
+    return $html . "</$tag></li>";
 }
 
 /* The first few sponsors' names, then how many more - "A, B, C and 9 more". */
@@ -230,15 +260,39 @@ function tierHead(array $tier, $name_tag = 'strong') {
         . "<$name_tag class=\"tier-name\">" . e($tier['name']) . "</$name_tag>"
         . '<span class="tier-amount">' . money($tier['price']) . (!empty($tier['custom']) ? '+' : '') . '<small>/mo</small></span>';
 }
-/* Does a tier get a place on itflow.org - 'listed' on it, or on a tier it includes? */
-function tierListed($key, array $tiers) {
+/* Does a tier have $flag ('whitelabel', say) - set on it, or on a tier it includes? */
+function tierHas($key, $flag, array $tiers) {
     for ($seen = 0; isset($tiers[$key]) && $seen < 10; $seen++) {
-        if (!empty($tiers[$key]['listed'])) {
+        if (!empty($tiers[$key][$flag])) {
             return true;
         }
         $key = $tiers[$key]['includes'] ?? '';
     }
     return false;
+}
+
+/*
+ * Forum usernames typed into one box - separated by commas, spaces or new lines,
+ * an @ in front or not - as [usernames, error]. Up to 20, each as the forum allows.
+ */
+function forumUsernames($text) {
+    $names = [];
+    foreach (preg_split('/[\s,;]+/', (string) $text, -1, PREG_SPLIT_NO_EMPTY) as $name) {
+        $name = ltrim($name, '@');
+        if ($name === '') {
+            continue;
+        }
+        if (!preg_match('/^[A-Za-z0-9_.-]{1,60}$/', $name)) {
+            return [[], 'A forum username has only letters, numbers, dots, dashes and underscores - "' . $name . '" doesn\'t.'];
+        }
+        if (!in_array(strtolower($name), array_map('strtolower', $names), true)) {
+            $names[] = $name;
+        }
+    }
+    if (count($names) > 20) {
+        return [[], 'Up to 20 forum usernames, please - we can add more by email.'];
+    }
+    return [$names, ''];
 }
 
 function tierPerks(array $tier, array $tiers) {
