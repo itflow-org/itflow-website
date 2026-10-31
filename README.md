@@ -149,13 +149,13 @@ require __DIR__ . '/includes/header.php';
 require __DIR__ . '/includes/footer.php';
 ```
 
-`terms.php` lives on the server only, so it isn't in this folder. To give it the new menu and footer, swap its top and bottom for the lines above and put its text inside `<section class="wrap prose">`.
+`terms.php`, the Terms of Use, is built this way. The details that are a business decision - who "we" are, the contact address, the governing law, the date it last changed and the days it gives (overdue, removal and notice) - are in `$terms` at its top; change `'updated'` whenever the terms change.
 
 ## Before you upload
 
 1. **Delete `index.html` on the server** if it is still there - many servers serve `index.html` ahead of `index.php`.
 2. **Create `config.local.php`** from `config.local.example.php`, with the real form secret and mail password.
-3. **Update `terms.php`** as described above.
+3. **Check the settings at the top of `terms.php`.**
 4. The old `assets/img/itflow.gif` and any old logo images are no longer used; the logo is drawn from text and the screenshots replace the animation.
 
 ## Files
@@ -167,6 +167,7 @@ require __DIR__ . '/includes/footer.php';
 | `signup.php` | The hosted ITFlow and sponsorship sign-up, and the Pay step after it |
 | `sponsor.php` | The short link to sponsoring - on to the sign-up, or to the "Your logo here" tile's address while sign-ups are closed |
 | `hosting.php` | The sign-up's old address - sends visitors on to `signup.php` |
+| `terms.php` | The Terms of Use - the website, the demo, hosted ITFlow and sponsorships |
 | `includes/bootstrap.php` | Loads the config; small helpers (`e()`, `money()`, `shot()`, `logoHtml()`, `sectionOn()` ...) |
 | `includes/header.php`, `includes/footer.php` | The top and bottom of every page |
 | `includes/home/*.php` | Each homepage section |

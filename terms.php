@@ -1,7 +1,7 @@
 <?php
 /*
  * itflow.org - Terms of Use: the website, the demo, hosted ITFlow and
- * sponsorships. ITFlow itself is covered by its own license (GPL-3.0).
+ * sponsorships. ITFlow itself is covered by its own license (AGPL-3.0).
  *
  * The details that are yours to decide are in $terms just below - check them
  * before this goes live, and change 'updated' whenever the terms change.
@@ -52,7 +52,7 @@ require __DIR__ . '/includes/header.php';
     <p>ITFlow is built by a small team who run their own MSPs. In these terms, "we" and "us" mean <?= e($terms['operator']) ?>, and "you" means you and the company you sign up for. By using this site, hosted ITFlow or a sponsorship, you agree to these terms.</p>
 
     <h2 id="software">The ITFlow software</h2>
-    <p>ITFlow is free and open source under the <a href="https://github.com/itflow-org/itflow/blob/master/LICENSE" target="_blank" rel="noopener">GNU General Public License v3.0</a>. That license, not these terms, covers using, copying, changing and sharing the software, and it says ITFlow comes as is, without warranty. Hosting with us or sponsoring the project doesn't change the license.</p>
+    <p>ITFlow is free and open source under the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank" rel="noopener">GNU Affero General Public License v3.0</a> (AGPL-3.0); releases up to 26.11.1 were under the GPL-3.0. That license, not these terms, covers using, copying, changing and sharing the software, and it says ITFlow comes as is, without warranty. Hosting with us or sponsoring the project doesn't change the license.</p>
 
     <h2 id="site">This website and the demo</h2>
     <p>We keep this site accurate, but it can change at any time, prices included. A price change for something you already pay for works as described under <a href="#payment">Paying us</a>. Links to other sites are for your convenience; we don't control them.</p>

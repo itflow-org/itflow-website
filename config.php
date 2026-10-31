@@ -47,7 +47,7 @@ $site = [
     'forum_url'   => 'https://forum.itflow.org',
     'github_url'  => 'https://github.com/itflow-org/itflow',
     'docker_url'  => 'https://hub.docker.com/r/itfloworg/itflow',
-    'license'     => 'GPL-3.0',
+    'license'     => 'AGPL-3.0',
     'og_image'    => 'assets/img/og.png',   // the picture shown when the site is shared
 ];
 
@@ -286,7 +286,7 @@ $team = [
 // Footer
 // ---------------------------------------------------------------------------
 $footer = [
-    'text'   => 'Free, open-source documentation, ticketing and billing for MSPs. Licensed under the GPL-3.0.',
+    'text'   => 'Free, open-source documentation, ticketing and billing for MSPs. Licensed under the AGPL-3.0.',
     'social' => [
         ['icon' => 'fab fa-github',  'href' => 'https://github.com/itflow-org/itflow#readme',     'label' => 'GitHub'],
         ['icon' => 'fab fa-youtube', 'href' => 'https://www.youtube.com/@wrongecho5029/featured', 'label' => 'YouTube'],
