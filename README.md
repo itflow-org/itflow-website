@@ -117,15 +117,17 @@ Bots are kept out by a hidden field and a signed timestamp: a form sent within f
 
 ## Secrets
 
-Keep the real form secret and mail password out of git, in `config.local.php` next to `config.php` - `.gitignore` already excludes it. `config.local.example.php` shows what goes in it:
+Keep the real form secret and mail password out of git, in `config.local.php` next to `config.php` - `.gitignore` already excludes it. Copy `config.local.example.php` to start it: the secrets are at the top, and below them, commented out, every setting a server usually changes - the mail server, who gets sign-ups and the fields they need, the section switches, the site's own address (for a staging copy) and the hosting prices used while the form isn't linked to ITFlow. config.php reads it last, so anything set there wins, on that server only.
 
 ```php
 <?php
-$signup['form_secret']   = 'a-long-random-string';
+$signup['form_secret']   = 'a-long-random-string';          // required - openssl rand -hex 32
 $mail['password']        = 'smtp-password';
 $signup['itflow_url']    = 'https://billing.example.com';   // optional - see "Sign-ups straight into ITFlow"
 $signup['itflow_secret'] = 'from Hosting > Settings';
 ```
+
+The form secret has to be set: config.php's own is public, so with it the bot check keeps nobody out.
 
 ## Adding a page
 
@@ -150,7 +152,7 @@ require __DIR__ . '/includes/footer.php';
 ## Before you upload
 
 1. **Delete `index.html` on the server** if it is still there - many servers serve `index.html` ahead of `index.php`.
-2. **Create `config.local.php`** with the real form secret and mail password.
+2. **Create `config.local.php`** from `config.local.example.php`, with the real form secret and mail password.
 3. **Update `terms.php`** as described above.
 4. The old `assets/img/itflow.gif` and any old logo images are no longer used; the logo is drawn from text and the screenshots replace the animation.
 
