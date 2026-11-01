@@ -207,10 +207,10 @@ $start = [
 // and on hovering a name.
 // ---------------------------------------------------------------------------
 $sponsors = [
-    ['name' => 'PittPC',                  'tier' => 'premier', 'logo' => 'assets/img/sponsors/pittpc.svg',        'url' => 'https://pittpc.com'],
-    ['name' => 'DigiBandit',              'tier' => 'premier', 'logo' => 'assets/img/sponsors/digibandit.png',    'url' => 'https://dbits.ca',             'since' => '2025-05'],
+    ['name' => 'PittPC',                  'tier' => 'premier', 'logo' => 'assets/img/sponsors/pittpc.svg',        'url' => 'https://pittpc.com',           'since' => '2018'],
     ['name' => 'Mountaineer IT',          'tier' => 'premier', 'logo' => 'assets/img/sponsors/mountaineerit.png', 'url' => 'https://mountaineerit.com',    'since' => '2025-12'],
-    ['name' => 'F1 for Help',             'url' => 'https://www.f1forhelp.net',      'since' => '2024-01'],
+    ['name' => 'DigiBandit',              'tier' => 'premier', 'logo' => 'assets/img/sponsors/digibandit.png',    'url' => 'https://dbits.ca',             'since' => '2025-05'],
+    ['name' => 'F1 for Help',             'tier' => 'premier', 'logo' => 'assets/img/sponsors/f1forhelp.svg',     'url' => 'https://www.f1forhelp.net',    'since' => '2024-01'],
     ['name' => 'CompuMatter',             'url' => 'https://compumatter.com',        'since' => '2024-02'],
     ['name' => 'DINadmin ApS',            'url' => 'https://dinadmin.dk',            'since' => '2025-03'],
     ['name' => 'DataBit Solutions',       'url' => 'https://databitsolutions.com',   'since' => '2025-12'],
@@ -229,7 +229,7 @@ $sponsors_section = [
     'list_title'    => 'Supporters',
     // After the list of names, for the sponsors who'd rather not be named - not
     // in the sign-up page's list. Leave out to show no such line.
-    'anonymous'     => ['text' => 'And many more who sponsor anonymously', 'since' => '2024'],
+    'anonymous'     => ['text' => 'And many more who sponsor anonymously', 'since' => '2018'],
     // The last premier tile, inviting the next sponsor. It opens the sign-up form
     // while that is open, and 'url' while it isn't. Leave out to show no such tile.
     'join'          => ['title' => 'Your logo here', 'text' => 'Become a premier sponsor', 'url' => 'https://services.itflow.org'],
