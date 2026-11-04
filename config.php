@@ -215,7 +215,7 @@ $sponsors = [
     ['name' => 'DINadmin ApS',            'url' => 'https://dinadmin.dk',            'since' => '2025-03'],
     ['name' => 'DataBit Solutions',       'url' => 'https://databitsolutions.com',   'since' => '2025-12'],
     ['name' => 'City of Rathdrum',        'url' => 'https://www.rathdrum.gov',       'since' => '2025-12'],
-    ['name' => 'Algolibre',               'url' => 'https://algolibre.io',           'since' => '2026-08'],
+    ['name' => 'AlgoLibre Inc.',          'url' => 'https://algolibre.io',           'since' => '2026-08'],
     ['name' => 'Pentagon Networks',       'url' => 'https://pentagon.net',           'since' => '2026-08'],
     ['name' => 'Hanobox e.K.',            'url' => 'https://hanobox.de',             'since' => '2026-10'],
     ['name' => 'Innovarro Group Limited', 'url' => 'https://innovarro.com',          'since' => '2026-10'],
