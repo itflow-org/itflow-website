@@ -380,6 +380,15 @@ $signup = [
     // (copy them from Hosting > Settings). Its prices and regions then replace $hosting's above.
     'itflow_url'    => '',
     'itflow_secret' => '',
+    // Or sign-ups as tickets in that ITFlow, through its API: the company as a lead with its contacts,
+    // and a ticket for each thing asked for. Set the key in config.local.php - from Admin > API Keys,
+    // for a user whose role has Modify on Clients and on Support.
+    'itflow_api_key' => '',
+    // The ticket template each ticket is raised from (its id, from Admin > Ticket Templates): its
+    // category, tasks, agent and priority, with its fill-ins answered from the form. 0: a plain ticket.
+    'ticket_templates' => ['hosting' => 0, 'sponsor' => 0],
+    // Still email notify_to a copy of each sign-up that went in as a ticket
+    'ticket_email' => true,
     'required'    => ['address', 'city', 'state', 'postal', 'country', 'phone'],
 ];
 

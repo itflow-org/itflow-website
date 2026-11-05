@@ -692,6 +692,12 @@ a.sponsor-chip:hover, a.sponsor-chip:focus-visible { border-color: var(--signal)
     .done .pay-item .button { width: 100%; }
 }
 
+/* A request opened as a ticket in ITFlow: what happens next, numbered */
+.next-steps { display: grid; gap: 12px; margin-top: 24px; padding: 0; list-style: none; counter-reset: next-step; }
+.next-steps li { position: relative; padding-left: 40px; color: var(--muted); font-size: 1.05rem; counter-increment: next-step; }
+.next-steps li::before { content: counter(next-step); position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--signal-soft); color: var(--signal); font-size: .85rem; font-weight: 700; }
+.next-steps strong { color: var(--ink); }
+
 /* Bots fill this in; people never see it */
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 

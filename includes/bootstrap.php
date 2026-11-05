@@ -8,6 +8,7 @@ define('ITFLOW_SITE', true);
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/itflow_link.php';
+require_once __DIR__ . '/itflow_tickets.php';
 
 // Prices, regions, the app domain and the paying sponsors from our billing ITFlow when the sign-up form is linked to it
 $hosting = itflowHostingInfo($hosting);

@@ -111,9 +111,33 @@ Linked, the prices, technicians and regions come from ITFlow (its Hosted ITFlow 
 
 If ITFlow can't be reached, or isn't taking sign-ups or sponsorships, the form emails the request like before - marked "NOT created" so someone adds it by hand - so no sign-up is lost.
 
+## Sign-ups as tickets in ITFlow
+
+Without the add-on, the form can still put each sign-up into our ITFlow - as a ticket to work through, through ITFlow's API. In that ITFlow:
+
+1. Make a role with **Modify** on **Clients** and on **Support**, an agent with that role for the website, and an API key for that agent in Admin > API Keys.
+2. Import `tools/itflow-onboarding-ticket-templates.json` in Admin > Ticket Templates and `tools/itflow-onboarding-canned-responses.json` in Admin > Canned Responses. They bring the **Onboard Hosting** and **Onboard Sponsor** ticket categories with them. Set who each template goes to - a file doesn't carry that.
+3. Put the address, the key and the two templates' ids (the number in each template's address) into `config.local.php`:
+
+```php
+$signup['itflow_url']       = 'https://billing.example.com';
+$signup['itflow_api_key']   = 'the key';
+$signup['ticket_templates'] = ['hosting' => 12, 'sponsor' => 13];
+```
+
+Each sign-up then:
+
+- **Makes the company a lead**, with its address and its primary, billing and technical contacts - or, when the primary contact's email is already a contact there, goes on that client.
+- **Opens a ticket for each thing asked for** - hosted ITFlow, a sponsorship - raised from its template: its category, its tasks (the steps from confirming it to handing it over, the ones for their answers), who it goes to and its priority, with the template's fill-ins answered from the form (Hostname, Technicians, Region, Tier...). The canned responses for its category are offered on it, filled in from those answers.
+- **Puts their own note** from the form on each ticket as an internal note, so it isn't sent back out by email.
+
+ITFlow tells people as it does for any new ticket: the contact gets its Ticket Created email (when ticket emails to clients are on) and replies to it to add anything, and the new-ticket address and the template's agent hear about it. The thank-you page says what happens next and links to each ticket. A copy still goes to `$signup['notify_to']` with the ticket numbers in its subject - set `$signup['ticket_email'] = false` once ITFlow's own notices are enough.
+
+With no template set (`0`), the ticket is a plain one with the sign-up in it. Whatever can't be opened - ITFlow down, a wrong key or template - is emailed as before, saying what went wrong, so no sign-up is lost. The same form sent twice opens nothing more: what a sign-up opened is kept for a day in the system's temp folder. When both the add-on and a key are set, the add-on takes what it can and the rest become tickets.
+
 ## Mail
 
-The sign-up form emails each request to `$signup['notify_to']` through PHPMailer 7.1.1 (`libs/PHPMailer/`) and stores nothing. SMTP is the default; set `'transport' => 'mail'` to use the server's own `mail()`. `$mail['timeout']` caps how long a slow mail server can hold the page.
+The sign-up form emails each request to `$signup['notify_to']` through PHPMailer 7.1.1 (`libs/PHPMailer/`) - all of them, or those that didn't go into ITFlow (and a copy of those that went in as tickets, while `ticket_email` is on). It stores nothing else. SMTP is the default; set `'transport' => 'mail'` to use the server's own `mail()`. `$mail['timeout']` caps how long a slow mail server can hold the page.
 
 Bots are kept out by a hidden field and a signed timestamp: a form sent within four seconds of loading, or more than a day later, or with a forged signature, looks sent but sends nothing.
 
@@ -127,6 +151,7 @@ $signup['form_secret']   = 'a-long-random-string';          // required - openss
 $mail['password']        = 'smtp-password';
 $signup['itflow_url']    = 'https://billing.example.com';   // optional - see "Sign-ups straight into ITFlow"
 $signup['itflow_secret'] = 'from Hosting > Settings';
+$signup['itflow_api_key'] = 'from Admin > API Keys';        // or this - see "Sign-ups as tickets in ITFlow"
 ```
 
 The form secret has to be set: config.php's own is public, so with it the bot check keeps nobody out.
@@ -173,6 +198,7 @@ require __DIR__ . '/includes/footer.php';
 | `includes/home/*.php` | Each homepage section |
 | `includes/mailer.php` | Sending mail with PHPMailer |
 | `includes/itflow_link.php` | The link to the billing ITFlow's Hosting add-on: signed requests, its prices, regions and tier prices, and the paying sponsors |
+| `includes/itflow_tickets.php` | Sign-ups as tickets in ITFlow through its API: the lead and its contacts, a ticket for each from its template, the note |
 | `assets/css/site.css` | All the styles, light and dark |
 | `assets/js/site.js` | The phone menu and "ITFlow in action" |
 | `assets/fonts/` | Inter (SIL Open Font License, `OFL.txt`) |
@@ -180,3 +206,4 @@ require __DIR__ . '/includes/footer.php';
 | `libs/PHPMailer/` | PHPMailer 7.1.1 (LGPL 2.1) |
 | `tools/webp.py` | Turns new screenshots into the site's files |
 | `tools/og.html` | The source of the share picture, `assets/img/og.png` |
+| `tools/itflow-onboarding-*.json` | The onboarding ticket templates and canned responses to import into our ITFlow - see "Sign-ups as tickets in ITFlow" |

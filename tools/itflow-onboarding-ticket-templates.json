@@ -1,0 +1,304 @@
+{
+    "format": "itflow-ticket-templates",
+    "version": 1,
+    "exported_at": "2026-11-05T22:12:23+00:00",
+    "templates": [
+        {
+            "name": "Hosted ITFlow - new instance",
+            "description": "A hosted ITFlow sign-up from itflow.org, from confirming it with them to handing it over. The website raises it with the fill-ins answered.",
+            "subject": "Hosted ITFlow: [Client] - [Hostname]",
+            "details": "<p>Hosted ITFlow for [Client] at <strong>[Hostname]</strong> - [Technicians] technicians in [Region], [Monthly] a month. Time zone [Time zone].</p>",
+            "category": {
+                "name": "Onboard Hosting",
+                "color": "#0d6efd",
+                "icon": "fa-cloud",
+                "description": "A new hosted ITFlow instance, from sign-up to handover"
+            },
+            "priority": "High",
+            "billable": false,
+            "due_hours": 0,
+            "tags": [],
+            "tasks": [
+                {
+                    "name": "Confirm the details with [Contact] - canned response Hosting: Confirm the details",
+                    "estimate": 5,
+                    "when": null
+                },
+                {
+                    "name": "Convert the lead to a client, add the hosting recurring invoice ([Monthly] a month) and send the first invoice",
+                    "estimate": 10,
+                    "when": null
+                },
+                {
+                    "name": "First invoice paid",
+                    "estimate": 0,
+                    "when": null
+                },
+                {
+                    "name": "Jabali: make their account on the ITFlow Hosted package (PHP exec allowed)",
+                    "estimate": 5,
+                    "when": null
+                },
+                {
+                    "name": "Jabali: add [Hostname] as a domain - mail none, DNS not managed there",
+                    "estimate": 2,
+                    "when": null
+                },
+                {
+                    "name": "DNS: add the A record for [Hostname] on the itflow.app DNS server",
+                    "estimate": 2,
+                    "when": {
+                        "fill_in": "Address",
+                        "value": "Our domain"
+                    }
+                },
+                {
+                    "name": "DNS: send them the A record for [Hostname] - canned response Hosting: DNS record to add",
+                    "estimate": 2,
+                    "when": {
+                        "fill_in": "Address",
+                        "value": "Their own domain"
+                    }
+                },
+                {
+                    "name": "Jabali: issue the SSL certificate once [Hostname] resolves to the server",
+                    "estimate": 2,
+                    "when": null
+                },
+                {
+                    "name": "Jabali: install ITFlow from Apps with our setup admin, company [Client]",
+                    "estimate": 5,
+                    "when": null
+                },
+                {
+                    "name": "Update it to the latest version - Maintenance > Update",
+                    "estimate": 5,
+                    "when": null
+                },
+                {
+                    "name": "Settings: time zone [Time zone], company details, turn cron on - leave mail for them",
+                    "estimate": 5,
+                    "when": null
+                },
+                {
+                    "name": "Managed Instances: add it for [Client] - [Technicians] seats, automatic updates - and paste its code into Admin > Managed By there",
+                    "estimate": 5,
+                    "when": null
+                },
+                {
+                    "name": "Check it checks in and shows healthy on Managed Instances",
+                    "estimate": 2,
+                    "when": null
+                },
+                {
+                    "name": "Invite [Contact] as an Administrator - Make the invite link",
+                    "estimate": 2,
+                    "when": null
+                },
+                {
+                    "name": "Send the invite link - canned response Hosting: Your ITFlow is ready",
+                    "estimate": 5,
+                    "when": null
+                },
+                {
+                    "name": "Once they have signed in, archive our setup admin",
+                    "estimate": 2,
+                    "when": null
+                },
+                {
+                    "name": "Wrap up - canned response Hosting: All set",
+                    "estimate": 2,
+                    "when": null
+                }
+            ],
+            "fill_ins": [
+                {
+                    "name": "Hostname",
+                    "type": "text",
+                    "options": [],
+                    "required": true,
+                    "client": true,
+                    "help": "Where it will be - acme.itflow.app, or itflow.acme.com on their own domain"
+                },
+                {
+                    "name": "Address",
+                    "type": "list",
+                    "options": [
+                        "Our domain",
+                        "Their own domain"
+                    ],
+                    "required": true,
+                    "client": true,
+                    "help": "Our domain: a name on itflow.app, and we add the DNS record. Their own domain: they point it at the server."
+                },
+                {
+                    "name": "Region",
+                    "type": "text",
+                    "options": [],
+                    "required": false,
+                    "client": true,
+                    "help": "The server it goes on - us-east02"
+                },
+                {
+                    "name": "Technicians",
+                    "type": "text",
+                    "options": [],
+                    "required": false,
+                    "client": true,
+                    "help": "The seat limit to set on Managed Instances"
+                },
+                {
+                    "name": "Monthly",
+                    "type": "text",
+                    "options": [],
+                    "required": false,
+                    "client": true,
+                    "help": "What the recurring invoice comes to"
+                },
+                {
+                    "name": "Time zone",
+                    "type": "text",
+                    "options": [],
+                    "required": false,
+                    "client": true,
+                    "help": "From their browser - America/New_York"
+                }
+            ],
+            "portal": null
+        },
+        {
+            "name": "Sponsorship - new sponsor",
+            "description": "A sponsorship from itflow.org, from confirming it with them to their perks being live. The website raises it with the fill-ins answered.",
+            "subject": "Sponsorship: [Client] - [Tier]",
+            "details": "<p>[Client] sponsors ITFlow as a <strong>[Tier]</strong> sponsor, [Monthly] a month - shown as [Shown as].</p>",
+            "category": {
+                "name": "Onboard Sponsor",
+                "color": "#d63384",
+                "icon": "fa-hand-holding-heart",
+                "description": "A new sponsor, from sign-up to their perks being live"
+            },
+            "priority": "Medium",
+            "billable": false,
+            "due_hours": 0,
+            "tags": [],
+            "tasks": [
+                {
+                    "name": "Thank [Contact] and confirm the sponsorship - canned response Sponsor: Thank you",
+                    "estimate": 5,
+                    "when": null
+                },
+                {
+                    "name": "Convert the lead to a client, add the [Tier] recurring invoice ([Monthly] a month) and send the first invoice",
+                    "estimate": 10,
+                    "when": null
+                },
+                {
+                    "name": "First invoice paid",
+                    "estimate": 0,
+                    "when": null
+                },
+                {
+                    "name": "Make their white-label key and send it - canned response Sponsor: Your white-label key",
+                    "estimate": 5,
+                    "when": {
+                        "fill_in": "White label",
+                        "value": "Yes"
+                    }
+                },
+                {
+                    "name": "Ask for their logo - canned response Sponsor: Send us your logo",
+                    "estimate": 2,
+                    "when": {
+                        "fill_in": "Logo",
+                        "value": "Yes"
+                    }
+                },
+                {
+                    "name": "Add [Shown as] to $sponsors in the website's config.php",
+                    "estimate": 5,
+                    "when": {
+                        "fill_in": "Anonymous",
+                        "value": "No"
+                    }
+                },
+                {
+                    "name": "Forum: give the heart to [Forum users]",
+                    "estimate": 2,
+                    "when": null
+                },
+                {
+                    "name": "Wrap up - canned response Sponsor: You're live",
+                    "estimate": 2,
+                    "when": null
+                }
+            ],
+            "fill_ins": [
+                {
+                    "name": "Tier",
+                    "type": "text",
+                    "options": [],
+                    "required": true,
+                    "client": true,
+                    "help": "Supporter, Sponsor or Premier Sponsor"
+                },
+                {
+                    "name": "Monthly",
+                    "type": "text",
+                    "options": [],
+                    "required": false,
+                    "client": true,
+                    "help": "What the recurring invoice comes to"
+                },
+                {
+                    "name": "Shown as",
+                    "type": "text",
+                    "options": [],
+                    "required": false,
+                    "client": true,
+                    "help": "The name on itflow.org - Anonymous when they asked not to be shown"
+                },
+                {
+                    "name": "Website",
+                    "type": "text",
+                    "options": [],
+                    "required": false,
+                    "client": true,
+                    "help": "Where their name or logo links to"
+                },
+                {
+                    "name": "Forum users",
+                    "type": "text",
+                    "options": [],
+                    "required": false,
+                    "client": true,
+                    "help": "Forum usernames that get the heart"
+                },
+                {
+                    "name": "Anonymous",
+                    "type": "yesno",
+                    "options": [],
+                    "required": false,
+                    "client": false,
+                    "help": "Yes: nothing on itflow.org"
+                },
+                {
+                    "name": "White label",
+                    "type": "yesno",
+                    "options": [],
+                    "required": false,
+                    "client": false,
+                    "help": "Yes: their tier includes a white-label key"
+                },
+                {
+                    "name": "Logo",
+                    "type": "yesno",
+                    "options": [],
+                    "required": false,
+                    "client": false,
+                    "help": "Yes: their tier shows a logo on itflow.org"
+                }
+            ],
+            "portal": null
+        }
+    ]
+}

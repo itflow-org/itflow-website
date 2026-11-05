@@ -1,0 +1,142 @@
+{
+    "format": "itflow-canned-responses",
+    "version": 1,
+    "exported_at": "2026-11-05T22:12:23+00:00",
+    "responses": [
+        {
+            "name": "Hosting: All set",
+            "body": "<p>Hi [First Name],</p><p>Good to see you're in. We've taken our setup account off your ITFlow, so every seat is yours. We're resolving this ticket now - for anything else, reply here or email us any time.</p><p>Welcome to hosted ITFlow.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Hosting",
+                    "color": "#0d6efd",
+                    "icon": "fa-cloud",
+                    "description": "A new hosted ITFlow instance, from sign-up to handover"
+                }
+            ],
+            "reply_type": "email",
+            "status": "Resolved",
+            "minutes": 0
+        },
+        {
+            "name": "Hosting: Confirm the details",
+            "body": "<p>Hi [First Name],</p><p>Thanks for signing up for hosted ITFlow. Here is what we have:</p><ul><li>Address: <strong>[Hostname]</strong></li><li>Technicians: [Technicians]</li><li>Region: [Region]</li><li>Each month: [Monthly]</li></ul><p>If that's all right, reply to say so and we'll send your first invoice. To change anything - more technicians, a different address - just tell us here.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Hosting",
+                    "color": "#0d6efd",
+                    "icon": "fa-cloud",
+                    "description": "A new hosted ITFlow instance, from sign-up to handover"
+                }
+            ],
+            "reply_type": "email",
+            "status": "On Hold",
+            "minutes": 0
+        },
+        {
+            "name": "Hosting: DNS record to add",
+            "body": "<p>Hi [First Name],</p><p>To use <strong>[Hostname]</strong>, add this record where your domain's DNS is managed:</p><table><tbody><tr><td>Type</td><td><strong>A</strong></td></tr><tr><td>Name</td><td><strong>[Hostname]</strong> - some DNS panels want only the first part</td></tr><tr><td>Value</td><td><strong>[Server IP]</strong></td></tr><tr><td>TTL</td><td>Automatic, or 3600</td></tr></tbody></table><p>Reply here once it's in. As soon as it resolves we put the certificate on it and finish setting up your ITFlow.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Hosting",
+                    "color": "#0d6efd",
+                    "icon": "fa-cloud",
+                    "description": "A new hosted ITFlow instance, from sign-up to handover"
+                }
+            ],
+            "reply_type": "email",
+            "status": "On Hold",
+            "minutes": 0
+        },
+        {
+            "name": "Hosting: First invoice sent",
+            "body": "<p>Hi [First Name],</p><p>Your first invoice is on its way in a separate email. As soon as it's paid we set up your ITFlow at <strong>[Hostname]</strong> - usually the same business day - and send you an invite to sign in.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Hosting",
+                    "color": "#0d6efd",
+                    "icon": "fa-cloud",
+                    "description": "A new hosted ITFlow instance, from sign-up to handover"
+                }
+            ],
+            "reply_type": "email",
+            "status": "On Hold",
+            "minutes": 0
+        },
+        {
+            "name": "Hosting: Your ITFlow is ready",
+            "body": "<p>Hi [First Name],</p><p>Your ITFlow is ready at <strong>https://[Hostname]</strong>.</p><p><strong>1. Accept your invite.</strong> Open this link, choose your password and sign in - it works for 7 days:<br />[Invite link]</p><p><strong>2. Connect your mail.</strong> In <strong>Admin &gt; Mail</strong>, set up sending - and receiving, for email to tickets - with your own mail server, Microsoft 365 or Google. ITFlow sends nothing until you do: no invites, no ticket emails, no invoices. The steps are at https://docs.itflow.org/admin/mail</p><p><strong>3. Invite your team.</strong> In <strong>Admin &gt; Users</strong>, New User. You have [Technicians] technician seats - clients and their portal contacts are free.</p><p>We keep it up to date and back it up every night. Anything you need, just reply here.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Hosting",
+                    "color": "#0d6efd",
+                    "icon": "fa-cloud",
+                    "description": "A new hosted ITFlow instance, from sign-up to handover"
+                }
+            ],
+            "reply_type": "email",
+            "status": "On Hold",
+            "minutes": 0
+        },
+        {
+            "name": "Sponsor: Send us your logo",
+            "body": "<p>Hi [First Name],</p><p>So we can put your logo on itflow.org, reply with it - an SVG, or a PNG at least 600 pixels wide on a transparent background. It will link to [Website].</p>",
+            "categories": [
+                {
+                    "name": "Onboard Sponsor",
+                    "color": "#d63384",
+                    "icon": "fa-hand-holding-heart",
+                    "description": "A new sponsor, from sign-up to their perks being live"
+                }
+            ],
+            "reply_type": "email",
+            "status": "On Hold",
+            "minutes": 0
+        },
+        {
+            "name": "Sponsor: Thank you",
+            "body": "<p>Hi [First Name],</p><p>Thank you for sponsoring ITFlow - sponsors are what keep it free and open source. You're signed up as a <strong>[Tier]</strong> sponsor at [Monthly] a month.</p><p>Your first invoice is on its way in a separate email, and your sponsorship starts as soon as it's paid.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Sponsor",
+                    "color": "#d63384",
+                    "icon": "fa-hand-holding-heart",
+                    "description": "A new sponsor, from sign-up to their perks being live"
+                }
+            ],
+            "reply_type": "email",
+            "status": "On Hold",
+            "minutes": 0
+        },
+        {
+            "name": "Sponsor: You're live",
+            "body": "<p>Hi [First Name],</p><p>Your sponsorship is live - thank you again. Here's what's in place:</p><ul><li>[Shown as] on itflow.org, linking to [Website]</li><li>The heart next to [Forum users] on the forum</li><li>Your white-label key, sent separately</li></ul><p>We're resolving this ticket now - reply any time.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Sponsor",
+                    "color": "#d63384",
+                    "icon": "fa-hand-holding-heart",
+                    "description": "A new sponsor, from sign-up to their perks being live"
+                }
+            ],
+            "reply_type": "email",
+            "status": "Resolved",
+            "minutes": 0
+        },
+        {
+            "name": "Sponsor: Your white-label key",
+            "body": "<p>Hi [First Name],</p><p>Here is your white-label key:</p><p><strong>[White-label key]</strong></p><p>In your ITFlow, paste it into <strong>Admin &gt; Settings &gt; Modules</strong>, White-label key, and save - \"Powered by ITFlow\" comes off your client portal. It's good for a year, and we send you a new one for as long as you sponsor.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Sponsor",
+                    "color": "#d63384",
+                    "icon": "fa-hand-holding-heart",
+                    "description": "A new sponsor, from sign-up to their perks being live"
+                }
+            ],
+            "reply_type": "email",
+            "status": null,
+            "minutes": 0
+        }
+    ]
+}

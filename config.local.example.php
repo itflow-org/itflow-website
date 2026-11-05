@@ -23,10 +23,21 @@ $signup['form_secret'] = 'replace-with-a-long-random-string';
 // The password for the mail server below (the SMTP username's password)
 $mail['password'] = '';
 
-// Sign-ups straight into our billing ITFlow's Hosting add-on - both from
-// Hosting > Settings there. Left empty, every sign-up is emailed instead.
+// Our billing ITFlow's address - for the Hosting add-on or for tickets below
 $signup['itflow_url']    = '';   // e.g. 'https://billing.pittpc.com'
+
+// Sign-ups straight into its Hosting add-on - from Hosting > Settings there
 $signup['itflow_secret'] = '';
+
+// Or sign-ups as tickets there: an API key from Admin > API Keys, for a user
+// whose role has Modify on Clients and on Support. Left empty (and no add-on),
+// every sign-up is emailed instead.
+$signup['itflow_api_key'] = '';
+
+// The ticket templates the tickets are raised from - their ids, from
+// Admin > Ticket Templates (the number in the template's address)
+// $signup['ticket_templates'] = ['hosting' => 0, 'sponsor' => 0];
+// $signup['ticket_email']     = true;   // still email notify_to a copy of each one
 
 // ===========================================================================
 // Mail - how sign-ups are emailed (and the fallback when ITFlow can't be reached)
