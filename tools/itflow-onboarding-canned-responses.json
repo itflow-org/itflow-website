@@ -1,11 +1,11 @@
 {
     "format": "itflow-canned-responses",
     "version": 1,
-    "exported_at": "2026-11-05T22:12:23+00:00",
+    "exported_at": "2026-11-05T23:10:22+00:00",
     "responses": [
         {
             "name": "Hosting: All set",
-            "body": "<p>Hi [First Name],</p><p>Good to see you're in. We've taken our setup account off your ITFlow, so every seat is yours. We're resolving this ticket now - for anything else, reply here or email us any time.</p><p>Welcome to hosted ITFlow.</p>",
+            "body": "<p>Hi [First Name],</p><p>Good to see you're in. We've taken our setup account off your ITFlow, so every seat is yours. We're resolving this ticket now - for anything else, reply here or email us any time.</p><p>Your invoices are in our client portal each month, where you can also save a card so they're paid by themselves.</p><p>Welcome to hosted ITFlow.</p>",
             "categories": [
                 {
                     "name": "Onboard Hosting",
@@ -20,7 +20,7 @@
         },
         {
             "name": "Hosting: Confirm the details",
-            "body": "<p>Hi [First Name],</p><p>Thanks for signing up for hosted ITFlow. Here is what we have:</p><ul><li>Address: <strong>[Hostname]</strong></li><li>Technicians: [Technicians]</li><li>Region: [Region]</li><li>Each month: [Monthly]</li></ul><p>If that's all right, reply to say so and we'll send your first invoice. To change anything - more technicians, a different address - just tell us here.</p>",
+            "body": "<p>Hi [First Name],</p><p>Thanks for signing up for hosted ITFlow. Before we set it up, here is what we have:</p><ul><li>Address: <strong>[Hostname]</strong></li><li>Technicians: [Technicians]</li><li>Region: [Region]</li><li>Each month: [Monthly]</li></ul><p>[What to check]</p><p>Just reply here - and if anything needs changing, more technicians or a different address, tell us before you pay and we'll send a new invoice.</p>",
             "categories": [
                 {
                     "name": "Onboard Hosting",
@@ -49,8 +49,23 @@
             "minutes": 0
         },
         {
-            "name": "Hosting: First invoice sent",
-            "body": "<p>Hi [First Name],</p><p>Your first invoice is on its way in a separate email. As soon as it's paid we set up your ITFlow at <strong>[Hostname]</strong> - usually the same business day - and send you an invite to sign in.</p>",
+            "name": "Hosting: Payment received",
+            "body": "<p>Hi [First Name],</p><p>Thank you - your payment is in. We're setting up your ITFlow at <strong>[Hostname]</strong> now, usually the same business day, and we'll send your invite to sign in here as soon as it's ready.</p>",
+            "categories": [
+                {
+                    "name": "Onboard Hosting",
+                    "color": "#0d6efd",
+                    "icon": "fa-cloud",
+                    "description": "A new hosted ITFlow instance, from sign-up to handover"
+                }
+            ],
+            "reply_type": "email",
+            "status": "Open",
+            "minutes": 0
+        },
+        {
+            "name": "Hosting: Payment reminder",
+            "body": "<p>Hi [First Name],</p><p>Your first invoice for hosted ITFlow is still waiting. You can pay it from the invoice email, or in our client portal, where you can save a card for the months ahead.</p><p>As soon as it's paid we set up your ITFlow at <strong>[Hostname]</strong> - usually the same business day.</p>",
             "categories": [
                 {
                     "name": "Onboard Hosting",
@@ -95,7 +110,7 @@
         },
         {
             "name": "Sponsor: Thank you",
-            "body": "<p>Hi [First Name],</p><p>Thank you for sponsoring ITFlow - sponsors are what keep it free and open source. You're signed up as a <strong>[Tier]</strong> sponsor at [Monthly] a month.</p><p>Your first invoice is on its way in a separate email, and your sponsorship starts as soon as it's paid.</p>",
+            "body": "<p>Hi [First Name],</p><p>Thank you for sponsoring ITFlow - your payment is in, and your <strong>[Tier]</strong> sponsorship has started. Sponsors are what keep ITFlow free and open source.</p><p>We'll be in touch here about the rest of what your tier brings. Each month's invoice is in our client portal, where you can save a card so it's paid by itself.</p>",
             "categories": [
                 {
                     "name": "Onboard Sponsor",
@@ -105,7 +120,7 @@
                 }
             ],
             "reply_type": "email",
-            "status": "On Hold",
+            "status": "Open",
             "minutes": 0
         },
         {

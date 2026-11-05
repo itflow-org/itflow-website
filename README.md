@@ -131,9 +131,29 @@ Each sign-up then:
 - **Opens a ticket for each thing asked for** - hosted ITFlow, a sponsorship - raised from its template: its category, its tasks (the steps from confirming it to handing it over, the ones for their answers), who it goes to and its priority, with the template's fill-ins answered from the form (Hostname, Technicians, Region, Tier...). The canned responses for its category are offered on it, filled in from those answers.
 - **Puts their own note** from the form on each ticket as an internal note, so it isn't sent back out by email.
 
-ITFlow tells people as it does for any new ticket: the contact gets its Ticket Created email (when ticket emails to clients are on) and replies to it to add anything, and the new-ticket address and the template's agent hear about it. The thank-you page says what happens next and links to each ticket. A copy still goes to `$signup['notify_to']` with the ticket numbers in its subject - set `$signup['ticket_email'] = false` once ITFlow's own notices are enough.
+ITFlow tells people as it does for any new ticket: the contact gets its Ticket Created email (when ticket emails to clients are on) and replies to it to add anything, and the new-ticket address and the template's agent hear about it - unless it is invoiced (below). The thank-you page says what happens next and links to each ticket. A copy still goes to `$signup['notify_to']` with the ticket numbers in its subject - set `$signup['ticket_email'] = false` once ITFlow's own notices are enough.
 
-With no template set (`0`), the ticket is a plain one with the sign-up in it. Whatever can't be opened - ITFlow down, a wrong key or template - is emailed as before, saying what went wrong, so no sign-up is lost. The same form sent twice opens nothing more: what a sign-up opened is kept for a day in the system's temp folder. When both the add-on and a key are set, the add-on takes what it can and the rest become tickets.
+With no template set (`0`), the ticket is a plain one with the sign-up in it. Whatever can't be opened or invoiced - ITFlow down, a wrong key, template or product - is emailed as before, saying what went wrong, so no sign-up is lost. The same form sent twice opens nothing more: what a sign-up opened is kept for a day in the system's temp folder. When both the add-on and a key are set, the add-on takes what it can and the rest become tickets.
+
+### Invoiced as they sign up
+
+Map the ITFlow products each thing is billed with, and each sign-up is invoiced there too. Give the key's role **Modify** on **Sales** as well, and add to `config.local.php` the products' ids (the number in each product's address in Sales > Products):
+
+```php
+$signup['itflow_products'] = ['hosting' => 23, 'seat' => 24, 'supporter' => 25, 'company' => 26, 'premier' => 27];
+```
+
+`hosting` is the instance with its included technicians, `seat` each technician past those, and one for each tier in `$sponsor_tiers` by its key. Then each sign-up also:
+
+- **Invites** the primary contact - and the billing contact, when that's someone else - to the client portal, where they find their invoices, can save a card for the months ahead, and follow their requests.
+- **Makes a monthly recurring invoice** for each thing asked for, from its products - the technicians past those included as a second line, a Premier Sponsor's chosen amount as its price - and **its first invoice straight away**, emailed to them.
+- **Ties each ticket to its first invoice, On Hold.** Only your team hears about the ticket; the customer has the invoice's email and the portal invite.
+- Ends on a thank-you page with a **Pay** button for each invoice.
+
+Once an invoice is paid in full - by card from its email or the portal, or a payment recorded by hand - ITFlow opens its ticket again with a note that it was paid and tells its agent, and the lead becomes a client (Admin > Settings > Invoices and billing, on by default). The work starts from there.
+
+The prices on this site then come from those products, kept for 10 minutes - change a price in ITFlow and the site follows. With a product left at `0`, that thing is not invoiced: its ticket opens as before, for you to invoice by hand.
+
 
 ## Mail
 

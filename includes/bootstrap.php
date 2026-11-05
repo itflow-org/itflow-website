@@ -13,6 +13,8 @@ require_once __DIR__ . '/itflow_tickets.php';
 // Prices, regions, the app domain and the paying sponsors from our billing ITFlow when the sign-up form is linked to it
 $hosting = itflowHostingInfo($hosting);
 $sponsor_tiers = itflowSponsorTiers($sponsor_tiers);
+// ...or from its products, when sign-ups become tickets and invoices there (includes/itflow_tickets.php)
+itflowApplyProductPrices($hosting, $sponsor_tiers);
 $sponsors = itflowSponsors($sponsors);
 
 /* Text made safe for HTML. */

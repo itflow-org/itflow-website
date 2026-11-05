@@ -16,6 +16,15 @@
  * add anything), the new-ticket address and the agent, as for a ticket raised
  * there. The API key's user needs Modify on Clients and on Support.
  *
+ * With the products in $signup['itflow_products'] as well (and Modify on
+ * Sales), it bills them too: a client portal invite for the primary contact
+ * (and the billing contact, when someone else), and for each thing asked for
+ * a monthly recurring invoice made from its products, whose first invoice is
+ * made and emailed straight away. Its ticket waits on that invoice, On Hold:
+ * once it is paid in full ITFlow opens the ticket again, tells its agent and
+ * - with its setting on - makes the lead a client. The prices shown here then
+ * come from those products (itflowProductPrices()).
+ *
  * What can't be opened - ITFlow down, a key or template that's wrong - is
  * emailed as before, saying why, so no sign-up is lost. The same form sent
  * twice opens nothing more: what it opened is kept for a day by its
@@ -31,6 +40,65 @@ if (!defined('ITFLOW_SITE')) {
 function itflowTicketsOn() {
     global $signup;
     return trim((string) ($signup['itflow_url'] ?? '')) !== '' && trim((string) ($signup['itflow_api_key'] ?? '')) !== '';
+}
+
+/* The product a thing is billed with - 'hosting', 'seat' or a tier's key - its id, or 0 when it isn't billed. */
+function itflowProductId($key) {
+    global $signup;
+    return itflowTicketsOn() ? (int) (($signup['itflow_products'] ?? [])[$key] ?? 0) : 0;
+}
+
+/*
+ * The prices of the products in $signup['itflow_products'], from ITFlow -
+ * [key => price], kept 10 minutes in the system's temp folder, so the prices
+ * shown are the ones invoiced. One that can't be read is left out (its
+ * config.php price stands); ITFlow out of reach keeps the last ones known.
+ */
+function itflowProductPrices() {
+    global $signup;
+    $ids = array_filter(array_map('intval', itflowTicketsOn() ? (array) ($signup['itflow_products'] ?? []) : []));
+    if (!$ids) {
+        return [];
+    }
+    $cache = rtrim(sys_get_temp_dir(), '/') . '/itflow-site-products-' . sha1((string) $signup['itflow_url'] . '|' . json_encode($ids)) . '.json';
+    $cached = is_file($cache) ? json_decode((string) @file_get_contents($cache), true) : null;
+    if (is_array($cached) && ($cached['until'] ?? 0) >= time()) {
+        return (array) $cached['prices'];
+    }
+    $prices = [];
+    $reached = false;
+    foreach ($ids as $key => $id) {
+        $answer = itflowApi('products/read', ['product_id' => $id], $status, true, 4);
+        if ($status === 0) {
+            break; // out of reach - not worth waiting on for each of the rest
+        }
+        $reached = true;
+        $price = $answer['data'][0]['product_price'] ?? null;
+        if ($status === 200 && is_numeric($price) && empty($answer['data'][0]['product_archived_at'])) {
+            $prices[$key] = $price + 0;
+        }
+    }
+    if (!$reached && is_array($cached)) {
+        $prices = (array) $cached['prices'];
+    }
+    @file_put_contents($cache, json_encode(['until' => time() + ($reached ? 600 : 120), 'prices' => $prices]), LOCK_EX);
+    return $prices;
+}
+
+/* $hosting and $sponsor_tiers with ITFlow's product prices in place of config.php's. */
+function itflowApplyProductPrices(array &$hosting, array &$sponsor_tiers) {
+    $prices = itflowProductPrices();
+    if (isset($prices['hosting'])) {
+        $hosting['base_price'] = $prices['hosting'];
+    }
+    if (isset($prices['seat'])) {
+        $hosting['seat_price'] = $prices['seat'];
+    }
+    foreach ($sponsor_tiers as $key => $tier) {
+        if (isset($prices[$key])) {
+            $sponsor_tiers[$key]['price'] = $prices[$key];
+        }
+    }
 }
 
 /*
@@ -100,14 +168,16 @@ function itflowApiWhy($endpoint, $status, $answer) {
  *   company    name, address, city, state, postal, country, website
  *   contacts   primary, billing, technical - each name, email, title, phone, mobile
  *   comments   their note, raw
- *   tickets    [kind => ['subject', 'details' (HTML), 'fill_ins' => [name => answer]]], kind 'hosting' or 'sponsor'
+ *   tickets    [kind => ['subject', 'details' (HTML), 'fill_ins' => [name => answer], 'scope', 'items']], kind
+ *              'hosting' or 'sponsor'; items, the recurring invoice's lines ([product_id, qty, price?]) - none, no invoice
  *
- * Returns ['client_id', 'client_made' (a new lead), 'tickets' => [kind => ['id', 'reference', 'url', 'tasks']],
- * 'errors' => [kind or 'client' => why]]. A kind missing from 'tickets' wasn't opened.
+ * Returns ['client_id', 'client_made' (a new lead), 'invited' => [emails], 'invoices' => [kind => ['recurring',
+ * 'invoice_id', 'reference', 'amount', 'currency', 'url']], 'tickets' => [kind => ['id', 'reference', 'url', 'tasks']],
+ * 'errors' => [kind, kind-invoice or 'client' => why]]. A kind missing from 'tickets' wasn't opened.
  */
 function itflowSignupTickets(array $in) {
     global $signup;
-    $result = ['client_id' => 0, 'client_made' => false, 'tickets' => [], 'errors' => []];
+    $result = ['client_id' => 0, 'client_made' => false, 'invited' => null, 'invoices' => [], 'tickets' => [], 'errors' => []];
 
     // Sent before? What it opened then - and one at a time, so a double click opens nothing twice
     $marker = rtrim(sys_get_temp_dir(), '/') . '/itflow-site-signup-' . sha1((string) $signup['itflow_url'] . '|' . $in['ref']) . '.json';
@@ -191,11 +261,61 @@ function itflowSignupTickets(array $in) {
         itflowSignupKeep($marker, null, $result);
     }
 
-    // A ticket for each thing they asked for, from its template
+    $billed = (bool) array_filter(array_column($in['tickets'], 'items'));
+
+    // Client portal access when they're billed - where their invoices are, a card can be saved and their requests followed
+    if ($billed && $result['invited'] === null) {
+        $result['invited'] = [];
+        $invite = [];
+        foreach (['primary', 'billing'] as $role) {
+            $person = $in['contacts'][$role];
+            $key = strtolower(trim((string) $person['email']));
+            if ($key !== '' && !isset($invite[$key])) {
+                $invite[$key] = ['email' => $person['email'], 'name' => $person['name'], 'billing' => 0, 'technical' => 0];
+            }
+        }
+        foreach (['billing', 'technical'] as $role) {
+            $key = strtolower(trim((string) $in['contacts'][$role]['email']));
+            if (isset($invite[$key])) {
+                $invite[$key][$role] = 1;
+            }
+        }
+        foreach ($invite as $person) {
+            $answer = itflowApi('portal_invites/create', ['client_id' => $result['client_id']] + $person, $status);
+            if ($status === 200 && in_array($answer['invite'] ?? '', ['invited', 'resent'], true)) {
+                $result['invited'][] = $person['email'];
+            }
+        }
+        itflowSignupKeep($marker, null, $result);
+    }
+
+    // A ticket for each thing they asked for, from its template - after its recurring invoice and first invoice, when it's billed
     $templates = (array) ($signup['ticket_templates'] ?? []);
     foreach ($in['tickets'] as $kind => $ticket) {
         if (isset($result['tickets'][$kind])) {
             continue;
+        }
+        if (!empty($ticket['items']) && !isset($result['invoices'][$kind])) {
+            $answer = itflowApi('recurring_invoices/create', [
+                'client_id' => $result['client_id'],
+                'scope' => $ticket['scope'] ?? $ticket['subject'],
+                'frequency' => 'month',
+                'items' => $ticket['items'],
+                'invoice_now' => 1,
+            ], $status, false, 30);
+            if ($status === 200 && ($answer['success'] ?? '') === 'True' && !empty($answer['invoice']['invoice_id'])) {
+                $result['invoices'][$kind] = [
+                    'recurring' => (string) ($answer['recurring_invoice_reference'] ?? ''),
+                    'invoice_id' => (int) $answer['invoice']['invoice_id'],
+                    'reference' => (string) $answer['invoice']['reference'],
+                    'amount' => (float) $answer['invoice']['amount'],
+                    'currency' => (string) $answer['invoice']['currency'],
+                    'url' => (string) $answer['invoice']['url'],
+                ];
+                itflowSignupKeep($marker, null, $result);
+            } else {
+                $result['errors']["$kind-invoice"] = itflowApiWhy('recurring_invoices/create', $status, $answer);
+            }
         }
         $ask = [
             'client_id' => $result['client_id'],
@@ -203,6 +323,13 @@ function itflowSignupTickets(array $in) {
             'ticket_details' => $ticket['details'],
             'ticket_notify' => 1,
         ];
+        // Waiting on its first invoice: On Hold until it's paid (ITFlow opens it again then). They have the
+        // invoice's email and the portal invite already, so only our team hears about the ticket.
+        if (isset($result['invoices'][$kind])) {
+            $ask['ticket_invoice_id'] = $result['invoices'][$kind]['invoice_id'];
+            $ask['ticket_status'] = 3;
+            $ask['ticket_notify'] = 'agents';
+        }
         if (!empty($result['contact_id'])) {
             $ask['ticket_contact_id'] = (int) $result['contact_id'];
         }
@@ -260,4 +387,16 @@ function itflowTicketDetails($heading, array $rows) {
         $html .= '<tr><td style="padding-right: 16px; vertical-align: top">' . e($label) . '</td><td>' . nl2br(e($value)) . '</td></tr>';
     }
     return $html . '</table>';
+}
+
+/* The line in the email to us about a thing's invoice - made and sent, or not made and why. '' when it isn't billed. */
+function itflowInvoiceLine(?array $ticketed, $kind) {
+    if (isset($ticketed['invoices'][$kind])) {
+        $invoice = $ticketed['invoices'][$kind];
+        return "  Invoice:      {$invoice['reference']} for " . money($invoice['amount']) . " sent, from recurring invoice {$invoice['recurring']} - the ticket waits On Hold until it is paid\n";
+    }
+    if (isset($ticketed['errors']["$kind-invoice"])) {
+        return "  Invoice:      NOT made - " . $ticketed['errors']["$kind-invoice"] . ". Make it by hand.\n";
+    }
+    return '';
 }

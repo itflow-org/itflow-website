@@ -52,6 +52,11 @@ $app_domain     = $hosting['app_domain'];
 // Hosted sign-ups and sponsorships go into ITFlow when linked and it is taking them; otherwise they are emailed
 $linked         = $offer_hosting && itflowLinked() && !empty($hosting['open']);
 $linked_sponsor = $offer_sponsor && itflowLinked() && itflowSponsorOpen();
+// ...or invoiced as they go into ITFlow as tickets, from its products (includes/itflow_tickets.php)
+$bill_hosting   = $offer_hosting && !$linked && itflowProductId('hosting') > 0;
+$bill_sponsor   = $offer_sponsor && !$linked_sponsor && (bool) array_filter(array_map('itflowProductId', array_keys($sponsor_tiers)));
+$invoice_hosting = $linked || $bill_hosting;
+$invoice_sponsor = $linked_sponsor || $bill_sponsor;
 $sponsor_names  = sponsorNamesShort($sponsors);
 $notify_to      = (array) $signup['notify_to'];
 
@@ -372,6 +377,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'Time zone' => $timezone,
                 ],
             ];
+            // Billed from its products: the instance, and each technician past those included
+            if (itflowProductId('hosting') && (!$extra || itflowProductId('seat'))) {
+                $tickets['hosting']['scope'] = "Hosted ITFlow - $hostname";
+                $tickets['hosting']['items'] = [['product_id' => itflowProductId('hosting'), 'qty' => 1, 'tax_id' => 'default']];
+                if ($extra) {
+                    $tickets['hosting']['items'][] = ['product_id' => itflowProductId('seat'), 'qty' => $extra, 'tax_id' => 'default'];
+                }
+            }
         }
         if ($ticket_sponsor) {
             $tier = $sponsor_tiers[$tier_key];
@@ -396,6 +409,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'Logo' => !$sponsor_anonymous && sponsorShow(['tier' => $tier_key]) !== 'name' ? 'Yes' : 'No',
                 ],
             ];
+            // Billed from the tier's product - at the amount they chose, for a tier that lets them
+            if (itflowProductId($tier_key)) {
+                $tickets['sponsor']['scope'] = "ITFlow sponsorship - {$tier['name']}";
+                $tickets['sponsor']['items'] = [['product_id' => itflowProductId($tier_key), 'qty' => 1, 'tax_id' => 'default']
+                    + (!empty($tier['custom']) ? ['price' => $sponsor_total] : [])];
+            }
         }
         $ticketed = itflowSignupTickets([
             // The same form sent twice is one sign-up
@@ -441,7 +460,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $body .= "  Time zone:    $timezone ($timezone_from)\n";
             $body .= $created
                 ? "  In ITFlow:    signed up as {$created['address']}, invoice {$created['invoice']['number']} sent - built once it is paid\n\n"
-                : (isset($opened['hosting']) ? "  In ITFlow:    ticket {$opened['hosting']['reference']} opened" . ($ticketed['client_made'] ? ', with the company as a new lead' : ' on their client') . "\n\n"
+                : (isset($opened['hosting']) ? "  In ITFlow:    ticket {$opened['hosting']['reference']} opened" . ($ticketed['client_made'] ? ', with the company as a new lead' : ' on their client') . "\n"
+                    . itflowInvoiceLine($ticketed, 'hosting') . "\n"
                 : ($ticket_hosting ? "  In ITFlow:    NO ticket - " . ($ticketed['errors']['hosting'] ?? $ticketed['errors']['client'] ?? 'not opened') . ". Open it by hand.\n\n"
                 : ($linked ? "  In ITFlow:    NOT created - ITFlow could not be reached. Add it by hand.\n\n" : "\n")));
         }
@@ -458,7 +478,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $body .= "  Forum users:  " . ($forum_users ? implode(', ', $forum_users) : '-') . "\n";
             $body .= $created_sponsor
                 ? "  In ITFlow:    signed up, invoice {$created_sponsor['invoice']['number']} sent - starts once it is paid\n\n"
-                : (isset($opened['sponsor']) ? "  In ITFlow:    ticket {$opened['sponsor']['reference']} opened" . ($ticketed['client_made'] ? ', with the company as a new lead' : ' on their client') . "\n\n"
+                : (isset($opened['sponsor']) ? "  In ITFlow:    ticket {$opened['sponsor']['reference']} opened" . ($ticketed['client_made'] ? ', with the company as a new lead' : ' on their client') . "\n"
+                    . itflowInvoiceLine($ticketed, 'sponsor') . "\n"
                 : ($ticket_sponsor ? "  In ITFlow:    NO ticket - " . ($ticketed['errors']['sponsor'] ?? $ticketed['errors']['client'] ?? 'not opened') . ". Open it by hand.\n\n"
                 : ($linked_sponsor ? "  In ITFlow:    NOT created - ITFlow could not be reached. Add it by hand.\n\n" : "\n")));
         }
@@ -517,15 +538,17 @@ if ($offer_hosting && $offer_sponsor) {
     $page_heading = 'Hosted ITFlow and sponsorship';
     $page_lede = $linked
         ? 'Sign up for your own hosted ITFlow, sponsor the project, or both. Hosted ITFlow is ready a few minutes after you pay your first invoice.'
-        : 'Sign up for your own hosted ITFlow, sponsor the project, or both. Nothing is charged until we have confirmed everything with you.';
+        : ($bill_hosting ? 'Sign up for your own hosted ITFlow, sponsor the project, or both. Your first invoice comes straight away, and we get started as soon as it is paid.'
+        : 'Sign up for your own hosted ITFlow, sponsor the project, or both. Nothing is charged until we have confirmed everything with you.');
 } elseif ($offer_hosting) {
     $page_heading = 'Hosted ITFlow';
     $page_lede = $linked
         ? 'Your own ITFlow, run, updated and backed up by the people who build it. Ready a few minutes after you pay your first invoice.'
-        : 'Your own ITFlow, run, updated and backed up by the people who build it. Nothing is charged until we have confirmed everything with you.';
+        : ($bill_hosting ? 'Your own ITFlow, run, updated and backed up by the people who build it. Your first invoice comes straight away, and we set it up as soon as it is paid.'
+        : 'Your own ITFlow, run, updated and backed up by the people who build it. Nothing is charged until we have confirmed everything with you.');
 } else {
     $page_heading = 'Sponsor ITFlow';
-    $page_lede = $linked_sponsor
+    $page_lede = $invoice_sponsor
         ? 'Help keep ITFlow free and open source. Your sponsorship starts as soon as you pay your first invoice.'
         : 'Help keep ITFlow free and open source. Nothing is charged until we have confirmed everything with you.';
 }
@@ -563,7 +586,7 @@ $step = 0;
 ?>
 
 <section class="wrap page-head">
-    <h1><?= e($created ? 'Thanks for signing up' : ($created_sponsor ? 'Thanks for sponsoring ITFlow' : ($sent ? 'Thanks, we have it' : $page_heading))) ?></h1>
+    <h1><?= e($created || !empty($ticketed['invoices']['hosting']) ? 'Thanks for signing up' : ($created_sponsor || !empty($ticketed['invoices']['sponsor']) ? 'Thanks for sponsoring ITFlow' : ($sent ? 'Thanks, we have it' : $page_heading))) ?></h1>
     <?php if (!$sent && !$created && !$created_sponsor) { ?><p><?= e($page_lede) ?></p><?php } ?>
 </section>
 
@@ -602,13 +625,21 @@ $step = 0;
         <p class="hint" style="margin-top: 14px"><?= count($to_pay) > 1 ? 'Both invoices are' : 'The invoice is' ?> in your email too<?= $want_sponsor && !$created_sponsor ? ", and we'll be in touch about your sponsorship" : '' ?><?= $want_hosting && !$created ? ", and we'll be in touch about your hosted ITFlow" : '' ?>.</p>
     </div>
 <?php } elseif ($sent && $opened) {
-    // Opened as tickets in ITFlow - what happens next, and where they can see each one
-    $next = ['We check the details with you and send your first invoice' . (count($opened) > 1 ? 's' : '') . '.'];
+    // Opened as tickets in ITFlow - billed or not - what happens next, and a Pay button or a link for each
+    $billed = array_intersect_key((array) ($ticketed['invoices'] ?? []), $opened);
+    $paid_when = function ($kind) use ($billed, $opened) {
+        $word = count($opened) > 1 ? ($kind === 'hosting' ? 'the hosting invoice' : 'the sponsorship invoice') : 'it';
+        return isset($billed[$kind]) ? "Once $word is paid" : 'Once your first invoice is paid';
+    };
+    $next = [];
+    if (count($billed) < count($opened)) {
+        $next[] = 'We check the details with you and send your first invoice' . (count($opened) - count($billed) > 1 ? 's' : '') . '.';
+    }
     if (isset($opened['hosting'])) {
         if ($access === 'own') {
             $next[] = 'We send you the DNS record to add for <strong>' . e($hostname) . '</strong>.';
         }
-        $next[] = 'Once ' . (isset($opened['sponsor']) ? 'the hosting invoice' : 'it') . ' is paid we set up your ITFlow at <strong>' . e($hostname) . '</strong> and send <strong>' . e($primary_email) . '</strong> an invite to sign in as its admin.';
+        $next[] = $paid_when('hosting') . ' we set up your ITFlow at <strong>' . e($hostname) . '</strong>, usually the same business day, and send <strong>' . e($primary_email) . '</strong> an invite to sign in as its admin.';
         $next[] = 'You connect it to your own mail server, invite your team, and you are away.';
     }
     if (isset($opened['sponsor'])) {
@@ -622,7 +653,10 @@ $step = 0;
         if ($forum_users) {
             $perks[] = 'the heart goes next to ' . e(listNames($forum_users)) . ' on the forum';
         }
-        $next[] = 'Once ' . (isset($opened['hosting']) ? 'the sponsorship invoice' : 'it') . ' is paid your sponsorship starts' . ($perks ? ': ' . listNames($perks) : '') . '.';
+        $next[] = $paid_when('sponsor') . ' your sponsorship starts' . ($perks ? ': ' . listNames($perks) : '') . '.';
+    }
+    if (!empty($ticketed['invited'])) {
+        $next[] = 'We have emailed <strong>' . e(listNames($ticketed['invited'])) . '</strong> an invite to our client portal - your invoices, a card saved for the months ahead, and your requests, in one place.';
     }
     // Asked for but not opened - emailed to us instead
     if ($want_hosting && !isset($opened['hosting'])) {
@@ -635,26 +669,33 @@ $step = 0;
     ?>
     <div class="done">
         <span class="done-mark"><i class="fas fa-check" aria-hidden="true"></i></span>
-        <h2>We'll be in touch within one business day</h2>
-        <p>We have your request<?= count($opened) > 1 ? 's' : '' ?>, and we'll reply to <strong><?= e($primary_email) ?></strong>. To add anything, just reply to our email.</p>
-        <ol class="next-steps">
-            <?php foreach ($next as $step_text) { ?><li><?= $step_text ?></li><?php } ?>
-        </ol>
+        <?php if ($billed) { ?>
+            <h2><?= count($billed) > 1 ? 'One step left: pay your first invoices' : 'One step left: pay your first invoice' ?></h2>
+            <p><?= count($billed) > 1 ? 'They are' : 'It is' ?> in your email too. As soon as <?= count($billed) > 1 ? 'each is' : 'it is' ?> paid we get started, and we reply to <strong><?= e($primary_email) ?></strong> as we go.</p>
+        <?php } else { ?>
+            <h2>We'll be in touch within one business day</h2>
+            <p>We have your request<?= count($opened) > 1 ? 's' : '' ?>, and we'll reply to <strong><?= e($primary_email) ?></strong>. To add anything, just reply to our email.</p>
+        <?php } ?>
         <ul class="pay-list">
             <?php foreach ($opened as $kind => $ticket) { ?>
                 <li class="pay-item">
                     <span class="pay-icon" aria-hidden="true"><i class="<?= $what[$kind][1] ?>"></i></span>
                     <span class="pay-what">
                         <strong><?= e($what[$kind][0]) ?></strong>
-                        <small><?= e($what[$kind][2]) ?> &middot; request <span style="white-space: nowrap"><?= e($ticket['reference']) ?></span></small>
+                        <small><?= e($what[$kind][2]) ?> &middot; request <?php if ($ticket['url'] !== '') { ?><a href="<?= e($ticket['url']) ?>" rel="noopener noreferrer" style="white-space: nowrap"><?= e($ticket['reference']) ?></a><?php } else { ?><span style="white-space: nowrap"><?= e($ticket['reference']) ?></span><?php } ?><?php if (isset($billed[$kind])) { ?> &middot; invoice <span style="white-space: nowrap"><?= e($billed[$kind]['reference']) ?></span><?php } ?></small>
                     </span>
-                    <?php if ($ticket['url'] !== '') { ?>
+                    <?php if (isset($billed[$kind]) && $billed[$kind]['url'] !== '') { ?>
+                        <a class="button button-primary button-small" href="<?= e($billed[$kind]['url']) ?>" rel="noopener noreferrer">Pay <?= e(money($billed[$kind]['amount'])) ?></a>
+                    <?php } elseif ($ticket['url'] !== '') { ?>
                         <a class="button button-secondary button-small" href="<?= e($ticket['url']) ?>" rel="noopener noreferrer">See where it stands</a>
                     <?php } ?>
                 </li>
             <?php } ?>
         </ul>
-        <a class="button button-primary" href="/">Back to ITFlow</a>
+        <ol class="next-steps">
+            <?php foreach ($next as $step_text) { ?><li><?= $step_text ?></li><?php } ?>
+        </ol>
+        <?php if (!$billed) { ?><a class="button button-primary" href="/">Back to ITFlow</a><?php } ?>
     </div>
 <?php } elseif ($sent) { ?>
     <div class="done">
@@ -907,7 +948,7 @@ $step = 0;
                 <span class="label" style="margin: 0">Total</span>
                 <span><span class="total" id="summaryTotal">$0</span> <span class="label-light">a month</span></span>
             </div>
-            <?php if ($linked && $linked_sponsor) {
+            <?php if ($invoice_hosting && $invoice_sponsor) {
                 // Which note fits what is ticked - the script swaps them as it changes
                 $ticked_hosting = $_SERVER['REQUEST_METHOD'] === 'POST' ? isset($_POST['want_hosting']) : $default_hosting;
                 $ticked_sponsor = $_SERVER['REQUEST_METHOD'] === 'POST' ? isset($_POST['want_sponsor']) : $default_sponsor;
@@ -915,14 +956,14 @@ $step = 0;
                 <p class="summary-note" data-linked-note data-note="hosting"<?= $note === 'hosting' ? '' : ' hidden' ?>>Hosted ITFlow: your first invoice comes next, and your ITFlow is built as soon as it is paid.</p>
                 <p class="summary-note" data-linked-note data-note="sponsor"<?= $note === 'sponsor' ? '' : ' hidden' ?>>Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
                 <p class="summary-note" data-linked-note data-note="both"<?= $note === 'both' ? '' : ' hidden' ?>>A first invoice for each comes next. Your ITFlow is built, and your sponsorship starts, as soon as each is paid.</p>
-            <?php } elseif ($linked) { ?>
+            <?php } elseif ($invoice_hosting) { ?>
                 <p class="summary-note" data-linked-note>Hosted ITFlow: your first invoice comes next, and your ITFlow is built as soon as it is paid.</p>
-            <?php } elseif ($linked_sponsor) { ?>
+            <?php } elseif ($invoice_sponsor) { ?>
                 <p class="summary-note" data-linked-note>Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
             <?php } else { ?>
                 <p class="summary-note">Nothing is charged now. We'll confirm everything with you and send your first invoice.</p>
             <?php } ?>
-            <button type="submit" class="button button-primary button-block"><?= $linked || $linked_sponsor ? 'Sign up' : 'Send request' ?></button>
+            <button type="submit" class="button button-primary button-block"><?= $invoice_hosting || $invoice_sponsor ? 'Sign up' : 'Send request' ?></button>
         </aside>
         </div>
     </form>

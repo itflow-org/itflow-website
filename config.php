@@ -389,6 +389,12 @@ $signup = [
     'ticket_templates' => ['hosting' => 0, 'sponsor' => 0],
     // Still email notify_to a copy of each sign-up that went in as a ticket
     'ticket_email' => true,
+    // Bill them there too - the ITFlow products each is invoiced with (their ids, from Sales > Products): 'hosting' the
+    // instance with its included technicians, 'seat' each technician more, and one per tier in $sponsor_tiers. Set, a
+    // sign-up gets a client portal invite and a monthly recurring invoice whose first invoice is emailed straight away,
+    // with a Pay button here; its ticket waits On Hold until that is paid. The prices shown then come from the products.
+    // The key's role needs Modify on Sales as well. 0: not billed - the ticket only.
+    'itflow_products' => ['hosting' => 0, 'seat' => 0, 'supporter' => 0, 'company' => 0, 'premier' => 0],
     'required'    => ['address', 'city', 'state', 'postal', 'country', 'phone'],
 ];
 

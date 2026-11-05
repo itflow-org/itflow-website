@@ -39,6 +39,10 @@ $signup['itflow_api_key'] = '';
 // $signup['ticket_templates'] = ['hosting' => 0, 'sponsor' => 0];
 // $signup['ticket_email']     = true;   // still email notify_to a copy of each one
 
+// Bill them there too: the products each is invoiced with - their ids, from
+// Sales > Products. The key's role then needs Modify on Sales as well.
+// $signup['itflow_products'] = ['hosting' => 0, 'seat' => 0, 'supporter' => 0, 'company' => 0, 'premier' => 0];
+
 // ===========================================================================
 // Mail - how sign-ups are emailed (and the fallback when ITFlow can't be reached)
 // ===========================================================================

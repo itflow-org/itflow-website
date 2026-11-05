@@ -1,11 +1,11 @@
 {
     "format": "itflow-ticket-templates",
     "version": 1,
-    "exported_at": "2026-11-05T22:12:23+00:00",
+    "exported_at": "2026-11-05T23:10:22+00:00",
     "templates": [
         {
             "name": "Hosted ITFlow - new instance",
-            "description": "A hosted ITFlow sign-up from itflow.org, from confirming it with them to handing it over. The website raises it with the fill-ins answered.",
+            "description": "A hosted ITFlow sign-up from itflow.org, from its first invoice being paid to handing it over. The website raises it On Hold, waiting on that invoice, with the fill-ins answered.",
             "subject": "Hosted ITFlow: [Client] - [Hostname]",
             "details": "<p>Hosted ITFlow for [Client] at <strong>[Hostname]</strong> - [Technicians] technicians in [Region], [Monthly] a month. Time zone [Time zone].</p>",
             "category": {
@@ -20,18 +20,18 @@
             "tags": [],
             "tasks": [
                 {
-                    "name": "Confirm the details with [Contact] - canned response Hosting: Confirm the details",
+                    "name": "Check the details - reply with Hosting: Confirm the details if anything needs changing",
                     "estimate": 5,
                     "when": null
                 },
                 {
-                    "name": "Convert the lead to a client, add the hosting recurring invoice ([Monthly] a month) and send the first invoice",
-                    "estimate": 10,
+                    "name": "First invoice paid - the ticket comes off hold by itself, with a note",
+                    "estimate": 0,
                     "when": null
                 },
                 {
-                    "name": "First invoice paid",
-                    "estimate": 0,
+                    "name": "Tell them it's under way - canned response Hosting: Payment received",
+                    "estimate": 2,
                     "when": null
                 },
                 {
@@ -168,7 +168,7 @@
         },
         {
             "name": "Sponsorship - new sponsor",
-            "description": "A sponsorship from itflow.org, from confirming it with them to their perks being live. The website raises it with the fill-ins answered.",
+            "description": "A sponsorship from itflow.org, from its first invoice being paid to their perks being live. The website raises it On Hold, waiting on that invoice, with the fill-ins answered.",
             "subject": "Sponsorship: [Client] - [Tier]",
             "details": "<p>[Client] sponsors ITFlow as a <strong>[Tier]</strong> sponsor, [Monthly] a month - shown as [Shown as].</p>",
             "category": {
@@ -183,18 +183,13 @@
             "tags": [],
             "tasks": [
                 {
-                    "name": "Thank [Contact] and confirm the sponsorship - canned response Sponsor: Thank you",
-                    "estimate": 5,
-                    "when": null
-                },
-                {
-                    "name": "Convert the lead to a client, add the [Tier] recurring invoice ([Monthly] a month) and send the first invoice",
-                    "estimate": 10,
-                    "when": null
-                },
-                {
-                    "name": "First invoice paid",
+                    "name": "First invoice paid - the ticket comes off hold by itself, with a note",
                     "estimate": 0,
+                    "when": null
+                },
+                {
+                    "name": "Thank [Contact] - canned response Sponsor: Thank you",
+                    "estimate": 2,
                     "when": null
                 },
                 {
