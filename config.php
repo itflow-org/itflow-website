@@ -396,6 +396,9 @@ $signup = [
     // The key's role needs Modify on Sales as well. 0: not billed - the ticket only.
     'itflow_products' => ['hosting' => 0, 'seat' => 0, 'supporter' => 0, 'company' => 0, 'premier' => 0],
     'required'    => ['address', 'city', 'state', 'postal', 'country', 'phone'],
+    // A box above the button asks for our project name, shown as its first two letters and a star for each
+    // of the rest (IT****). A person types it; bots don't. Case, spaces and dashes don't matter. '': no box.
+    'check_word'  => 'ITFlow',
 ];
 
 // ---------------------------------------------------------------------------

@@ -68,6 +68,10 @@ $signup['itflow_api_key'] = '';
 // Choices: address, city, state, postal, country, title, phone
 // $signup['required'] = ['address', 'city', 'state', 'postal', 'country', 'phone'];
 
+// The project name asked for in the box above the button, shown as IT**** -
+// '' takes the box away
+// $signup['check_word'] = 'ITFlow';
+
 // ===========================================================================
 // Section switches - true shows it, false hides it everywhere
 // ===========================================================================

@@ -159,7 +159,7 @@ The prices on this site then come from those products, kept for 10 minutes - cha
 
 The sign-up form emails each request to `$signup['notify_to']` through PHPMailer 7.1.1 (`libs/PHPMailer/`) - all of them, or those that didn't go into ITFlow (and a copy of those that went in as tickets, while `ticket_email` is on). It stores nothing else. SMTP is the default; set `'transport' => 'mail'` to use the server's own `mail()`. `$mail['timeout']` caps how long a slow mail server can hold the page.
 
-Bots are kept out by a hidden field and a signed timestamp: a form sent within four seconds of loading, or more than a day later, or with a forged signature, looks sent but sends nothing.
+Bots are kept out by a hidden field and a signed timestamp: a form sent within four seconds of loading, or more than a day later, or with a forged signature, looks sent but sends nothing. A box above the button also asks for our project name, shown as `IT****`: a person types it and bots don't. A wrong answer comes back to fix like any other field, and nothing is sent or made in ITFlow. Case, spaces and dashes don't matter. The word is `$signup['check_word']` - set it to `''` to take the box away.
 
 ## Secrets
 

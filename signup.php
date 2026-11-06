@@ -80,6 +80,13 @@ function reqStar($field) {
     return isRequired($field) ? ' <span class="req" aria-hidden="true">*</span>' : '';
 }
 
+// Our project name, asked for by the button (config: $signup['check_word']) - a person types it, bots don't
+$check_word = (string) ($signup['check_word'] ?? '');
+$check_hint = mb_substr($check_word, 0, 2) . str_repeat('*', max(0, mb_strlen($check_word) - 2));
+function checkWord($s) {
+    return preg_replace('/[\s._-]+/u', '', mb_strtolower(trim((string) $s)));
+}
+
 $field_labels = [
     'address' => 'Address', 'city' => 'City', 'state' => 'State', 'postal' => 'Postal code',
     'country' => 'Country', 'primary_title' => 'Title',
@@ -281,6 +288,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = "$label contact needs a name and a valid email, or tick \"Same as primary contact\".";
         }
         $contact_info[$key] = trim("$n <$em>" . ($ph !== '' ? ", $ph" : ''));
+    }
+
+    // Our project name, typed by the button - a wrong one comes back to fix, and nothing is sent or made
+    if ($check_word !== '' && checkWord(field('project_check')) !== checkWord($check_word)) {
+        $errors[] = "Type our project name ($check_hint) in the box above the button.";
     }
 
     // Into ITFlow - the client, and for each of hosting and the sponsorship its recurring invoice
@@ -962,6 +974,12 @@ $step = 0;
                 <p class="summary-note" data-linked-note>Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
             <?php } else { ?>
                 <p class="summary-note">Nothing is charged now. We'll confirm everything with you and send your first invoice.</p>
+            <?php } ?>
+            <?php if ($check_word !== '') { ?>
+                <div class="project-check">
+                    <label class="label" for="project_check">Type our project name: <?= e($check_hint) ?> <span class="req" aria-hidden="true">*</span></label>
+                    <input type="text" class="input" id="project_check" name="project_check" value="<?= old('project_check') ?>" maxlength="50" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+                </div>
             <?php } ?>
             <button type="submit" class="button button-primary button-block"><?= $invoice_hosting || $invoice_sponsor ? 'Sign up' : 'Send request' ?></button>
         </aside>
