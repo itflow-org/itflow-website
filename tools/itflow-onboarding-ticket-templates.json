@@ -81,6 +81,11 @@
                     "when": null
                 },
                 {
+                    "name": "config.php: add $config_manager_required = true; - it turns on Admin > Managed By and keeps it managed",
+                    "estimate": 2,
+                    "when": null
+                },
+                {
                     "name": "Managed Instances: add it for [Client] - [Technicians] seats, automatic updates - and paste its code into Admin > Managed By there",
                     "estimate": 5,
                     "when": null
