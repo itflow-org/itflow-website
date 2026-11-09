@@ -10,7 +10,8 @@
  * API key instead (includes/itflow_tickets.php), each becomes a ticket there,
  * raised from its onboarding template, on the company made a lead. What
  * isn't in ITFlow is emailed with PHPMailer. Nothing is stored here but what
- * a sign-up opened, for a day, so it isn't opened twice. Prices, tiers, required
+ * a sign-up opened, for a day, so it isn't opened twice, and a line in the
+ * sign-up log ($signup['log_file']) for each form sent. Prices, tiers, required
  * fields, mail settings and the on/off switches live in config.php (prices
  * and regions come from ITFlow when linked).
  *
@@ -21,6 +22,10 @@
  */
 
 require_once __DIR__ . '/includes/bootstrap.php';
+
+// Never kept by a browser, proxy or CDN: the form carries the time it was made, and a copy kept
+// for more than a day could only send back "send it again"
+header('Cache-Control: no-store, max-age=0');
 
 // ---------------------------------------------------------------------------
 // What this page offers, from the section switches
@@ -102,6 +107,19 @@ function field($key) {
 function line($key, $max = 200) {
     return mb_substr(preg_replace('/[\r\n\t]+/', ' ', field($key)), 0, $max);
 }
+/*
+ * A line in the sign-up log for a form sent - when, what came of it, what was asked for, the company and
+ * primary contact (so anyone sent back can be followed up), and from where. Into $signup['log_file'], or
+ * PHP's error log when that is '' or can't be written.
+ */
+function signupLog(string $outcome, string $about): void {
+    global $signup;
+    $entry = preg_replace('/[\r\n]+/', ' ', date('Y-m-d H:i:s T') . " | $outcome | $about | " . ($_SERVER['REMOTE_ADDR'] ?? '?'));
+    $file = (string) ($signup['log_file'] ?? '');
+    if ($file === '' || @file_put_contents($file, $entry . "\n", FILE_APPEND | LOCK_EX) === false) {
+        error_log("itflow.org sign-up: $entry");
+    }
+}
 function old($key, $default = '') {
     return e($_POST[$key] ?? $default);
 }
@@ -150,13 +168,23 @@ $opened = [];             // the tickets opened - [hosting|sponsor => reference,
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Anti-spam: honeypot + signed render time (bots post instantly)
+    // Anti-spam: a hidden field, and the time the form was made, signed (bots post instantly). A form that
+    // fails comes back to send again with everything kept (below) - it used to look sent and send nothing,
+    // which a person got too: autofill filling the hidden field, or a page opened the day before. The project
+    // name box is what keeps bots out now.
     $ts  = (int) ($_POST['ts'] ?? 0);
     $sig = (string) ($_POST['sig'] ?? '');
     $age = time() - $ts;
-    $is_bot = field('website_url') !== ''
-        || !hash_equals(hash_hmac('sha256', (string) $ts, $signup['form_secret']), $sig)
-        || $age < 4 || $age > 86400;
+    $spam_reason = '';
+    if (field('hp_field') !== '') {
+        $spam_reason = 'the hidden field was filled';
+    } elseif (!hash_equals(hash_hmac('sha256', (string) $ts, $signup['form_secret']), $sig)) {
+        $spam_reason = "the form's signature didn't match";
+    } elseif ($age < 4) {
+        $spam_reason = "sent $age seconds after the page opened";
+    } elseif ($age > 86400) {
+        $spam_reason = 'the page was opened ' . round($age / 3600) . ' hours before';
+    }
 
     $want_hosting = $offer_hosting && isset($_POST['want_hosting']);
     $want_sponsor = $offer_sponsor && isset($_POST['want_sponsor']);
@@ -295,11 +323,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Type our project name ($check_hint) in the box above the button.";
     }
 
+    // Failed the anti-spam check, with nothing else to fix: back to send again - the page it comes back on is new
+    if ($spam_reason !== '' && !$errors) {
+        $errors[] = "That didn't go through. Everything you typed is still here - press the button again to send it.";
+    }
+
     // Into ITFlow - the client, and for each of hosting and the sponsorship its recurring invoice
     // and first invoice. Whatever ITFlow isn't taking (or when it can't be reached) is emailed below.
     $itflow_hosting = $want_hosting && $linked;
     $itflow_sponsor = $want_sponsor && $linked_sponsor;
-    if (!$errors && !$is_bot && ($itflow_hosting || $itflow_sponsor)) {
+    if (!$errors && ($itflow_hosting || $itflow_sponsor)) {
         $person = function ($key) {
             return ['name' => line($key . '_name'), 'email' => line($key . '_email'), 'phone' => line($key . '_phone'), 'title' => line($key . '_title'), 'mobile' => line($key . '_mobile')];
         };
@@ -354,7 +387,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // and a ticket for each thing asked for, from its template (includes/itflow_tickets.php)
     $ticket_hosting = $want_hosting && !$created && itflowTicketsOn();
     $ticket_sponsor = $want_sponsor && !$created_sponsor && itflowTicketsOn();
-    if (!$errors && !$is_bot && ($ticket_hosting || $ticket_sponsor)) {
+    if (!$errors && ($ticket_hosting || $ticket_sponsor)) {
         $person = function ($key) {
             return ['name' => line($key . '_name'), 'email' => line($key . '_email'), 'phone' => line($key . '_phone'), 'title' => line($key . '_title'), 'mobile' => line($key . '_mobile')];
         };
@@ -444,11 +477,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $opened = $ticketed['tickets'];
     }
     // Everything asked for is in ITFlow - with a Pay button from the add-on, or as a ticket
-    $in_itflow = !$errors && !$is_bot && ($created || $created_sponsor || $opened)
+    $in_itflow = !$errors && ($created || $created_sponsor || $opened)
         && (!$want_hosting || $created || isset($opened['hosting'])) && (!$want_sponsor || $created_sponsor || isset($opened['sponsor']));
 
     // Send - what isn't in ITFlow, and a copy of what went in as a ticket while $signup['ticket_email'] is on
-    if (!$errors && !$is_bot && (!$in_itflow || ($opened && !empty($signup['ticket_email'])))) {
+    if (!$errors && (!$in_itflow || ($opened && !empty($signup['ticket_email'])))) {
         $monthly = $hosting_total + $sponsor_total;
         $parts = [];
         if ($want_hosting) {
@@ -534,12 +567,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!$in_itflow) {
             $errors[] = 'We could not send your request just now. Try again in a few minutes, or email us at ' . $notify_to[0] . '.';
         }
-    } elseif ($is_bot && !$errors) {
-        $sent = true; // look successful, send nothing
     }
     if ($in_itflow) {
         $sent = true;
     }
+
+    // What came of it, in the sign-up log
+    if ($errors) {
+        $outcome = ($spam_reason !== '' ? "sent back, anti-spam: $spam_reason" : 'sent back to fix: ' . $errors[0])
+            . (count($errors) > 1 ? ' (+' . (count($errors) - 1) . ' more)' : '');
+    } else {
+        $outcome = $in_itflow ? 'into ITFlow' . ($opened ? ' as tickets ' . implode(', ', array_column($opened, 'reference')) : '') : 'emailed';
+    }
+    $asked = array_filter([$want_hosting ? "hosting, $seats technicians" : '', $want_sponsor ? 'sponsor' . ($tier_key !== '' ? " ($tier_key)" : '') : '']);
+    signupLog($outcome, ($asked ? implode(' + ', $asked) : 'nothing chosen') . ' | ' . line('company') . ' <' . line('primary_email') . '>');
 }
 
 $ts = time();
@@ -732,7 +773,7 @@ $step = 0;
         <input type="hidden" name="ts" value="<?= $ts ?>">
         <input type="hidden" name="sig" value="<?= $sig ?>">
         <div class="hp" aria-hidden="true">
-            <label>Leave this empty <input type="text" name="website_url" tabindex="-1" autocomplete="off"></label>
+            <label>Leave this empty <input type="text" name="hp_field" tabindex="-1" autocomplete="off" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other"></label>
         </div>
 
         <div class="signup-grid">

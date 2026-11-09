@@ -72,6 +72,10 @@ $signup['itflow_api_key'] = '';
 // '' takes the box away
 // $signup['check_word'] = 'ITFlow';
 
+// A line for each form sent - what came of it and why. Outside the site's folder;
+// '' sends it to PHP's error log
+// $signup['log_file'] = dirname(__DIR__) . '/signups.log';
+
 // ===========================================================================
 // Section switches - true shows it, false hides it everywhere
 // ===========================================================================

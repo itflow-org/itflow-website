@@ -399,6 +399,10 @@ $signup = [
     // A box above the button asks for our project name, shown as its first two letters and a star for each
     // of the rest (IT****). A person types it; bots don't. Case, spaces and dashes don't matter. '': no box.
     'check_word'  => 'ITFlow',
+    // A line for each form sent: when, what came of it - into ITFlow, emailed, or sent back and why - what was
+    // asked for, the company and primary contact, and from where. Outside the site's folder, so the web can't
+    // read it. '' (or a file that can't be written): PHP's error log.
+    'log_file'    => dirname(__DIR__) . '/signups.log',
 ];
 
 // ---------------------------------------------------------------------------
