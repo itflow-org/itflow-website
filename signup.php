@@ -108,13 +108,44 @@ function line($key, $max = 200) {
     return mb_substr(preg_replace('/[\r\n\t]+/', ' ', field($key)), 0, $max);
 }
 /*
+ * The browser and system a form came from, from its User-Agent - "Chrome 142 on Windows". What it
+ * can't name is given as sent, cut short ("curl/8.5.0" is a script, not a person); '' with none.
+ */
+function visitorBrowser(): string {
+    $agent = trim(preg_replace('/[\x00-\x1f]+/', ' ', (string) ($_SERVER['HTTP_USER_AGENT'] ?? '')));
+    if ($agent === '') {
+        return '';
+    }
+    // Most specific first: an iPhone says "like Mac OS X", Android says Linux, Edge and Opera say Chrome
+    $system = '';
+    foreach (['/iPhone|iPad|iPod/' => 'iOS', '/Android/' => 'Android', '/CrOS/' => 'ChromeOS', '/Windows/' => 'Windows',
+        '/Macintosh|Mac OS X/' => 'macOS', '/Linux|X11/' => 'Linux'] as $pattern => $name) {
+        if (preg_match($pattern, $agent)) {
+            $system = $name;
+            break;
+        }
+    }
+    $browser = '';
+    foreach (['#Edg(?:e|A|iOS)?/(\d+)#' => 'Edge', '#(?:OPR|OPX)/(\d+)#' => 'Opera', '#SamsungBrowser/(\d+)#' => 'Samsung Internet',
+        '#(?:Firefox|FxiOS)/(\d+)#' => 'Firefox', '#(?:CriOS|Chrome)/(\d+)#' => 'Chrome', '#Version/(\d+)[\d.]* (?:Mobile/\S+ )?Safari/#' => 'Safari'] as $pattern => $name) {
+        if (preg_match($pattern, $agent, $match)) {
+            $browser = "$name $match[1]";
+            break;
+        }
+    }
+    if ($browser === '') {
+        return mb_strimwidth($agent, 0, 80, '...');
+    }
+    return $system !== '' ? "$browser on $system" : $browser;
+}
+/*
  * A line in the sign-up log for a form sent - when, what came of it, what was asked for, the company and
- * primary contact (so anyone sent back can be followed up), and from where. Into $signup['log_file'], or
- * PHP's error log when that is '' or can't be written.
+ * primary contact (so anyone sent back can be followed up), and the address and browser it came from. Into
+ * $signup['log_file'], or PHP's error log when that is '' or can't be written.
  */
 function signupLog(string $outcome, string $about): void {
     global $signup;
-    $entry = preg_replace('/[\r\n]+/', ' ', date('Y-m-d H:i:s T') . " | $outcome | $about | " . ($_SERVER['REMOTE_ADDR'] ?? '?'));
+    $entry = preg_replace('/[\r\n]+/', ' ', date('Y-m-d H:i:s T') . " | $outcome | $about | " . ($_SERVER['REMOTE_ADDR'] ?? '?') . ' | ' . (visitorBrowser() ?: '?'));
     $file = (string) ($signup['log_file'] ?? '');
     if ($file === '' || @file_put_contents($file, $entry . "\n", FILE_APPEND | LOCK_EX) === false) {
         error_log("itflow.org sign-up: $entry");
@@ -556,7 +587,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $body .= "COMMENTS\n" . $comments . "\n\n";
         }
         $body .= str_repeat('-', 40) . "\n";
-        $body .= "Submitted " . date('Y-m-d H:i T') . " from " . ($_SERVER['REMOTE_ADDR'] ?? '?') . "\n";
+        $body .= "Submitted: " . date('Y-m-d H:i T') . "\n";
+        $browser = visitorBrowser();
+        if ($browser !== '') {
+            $body .= "Browser: $browser\n";
+        }
+        $body .= "IP address: " . ($_SERVER['REMOTE_ADDR'] ?? '?') . "\n";
 
         $subject = 'Sign-up: ' . $company . ($want_hosting ? " - $seats technicians" : '') . ($want_sponsor ? ' - sponsor' : '')
             . ($opened ? ' [' . implode(', ', array_column($opened, 'reference')) . ']' : '');

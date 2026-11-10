@@ -161,7 +161,7 @@ The sign-up form emails each request to `$signup['notify_to']` through PHPMailer
 
 Bots are kept out by a hidden field and a signed timestamp: a form sent within four seconds of loading, or more than a day later, or with a forged signature, comes back to send again with everything typed kept. It used to look sent and send nothing, and people got that too - autofill filling the hidden field, or a page opened the day before. The sign-up page is sent with `Cache-Control: no-store`, so no browser, proxy or CDN keeps a copy. A box above the button also asks for our project name, shown as `IT****`: a person types it and bots don't. A wrong answer comes back to fix like any other field, and nothing is sent or made in ITFlow. Case, spaces and dashes don't matter. The word is `$signup['check_word']` - set it to `''` to take the box away.
 
-Every form sent is a line in `$signup['log_file']` - by default `signups.log` in the folder above the site's, where the web can't read it: when, what came of it (into ITFlow, emailed, or sent back and why), what was asked for, the company and primary contact, and the address it came from. Someone sent back can be followed up from there, and it shows whether people reach the form at all. Set it to `''` for PHP's error log instead.
+Every form sent is a line in `$signup['log_file']` - by default `signups.log` in the folder above the site's, where the web can't read it: when, what came of it (into ITFlow, emailed, or sent back and why), what was asked for, the company and primary contact, and the IP address and browser it came from. Someone sent back can be followed up from there, and it shows whether people reach the form at all. Set it to `''` for PHP's error log instead.
 
 ## Secrets
 
