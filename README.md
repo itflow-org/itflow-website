@@ -27,7 +27,7 @@ Everything you'd change lives in **`config.php`**, top to bottom in page order:
 | Sign-up recipients and required fields | `$signup` |
 | Mail server | `$mail` |
 
-Prices are only ever in `$hosting` and `$sponsor_tiers` - the hosting line under the top buttons, the hosted card and the sign-up form all read them from there. In hosting text, `{price}`, `{included}` and `{seat}` become the base price, the technicians included and the price per extra technician.
+Prices are only ever in `$hosting` and `$sponsor_tiers` - the hosting line under the top buttons, the hosted card and the sign-up form all read them from there. In hosting text, `{price}`, `{included}` and `{seat}` become the base price, the agents included and the price per extra agent. An agent is anyone who signs in to ITFlow, whatever their role - the same count as the seat limit on the instance.
 
 Icons are [Font Awesome 6 free](https://fontawesome.com/search?o=r&m=free) class names, e.g. `fas fa-rocket` or `fab fa-github`. Add, remove or reorder feature cards freely - the grid fills four across on a wide screen.
 
@@ -59,7 +59,7 @@ The form doesn't ask for a time zone. The visitor's browser says which one they'
 ### Links that preselect the sign-up
 
 - `signup.php?want=hosting` ticks hosted ITFlow
-- `signup.php?want=hosting&seats=7` also fills in 7 technicians (kept between the included number and `max_seats`)
+- `signup.php?want=hosting&seats=7` also fills in 7 agents (kept between the included number and `max_seats`)
 - `signup.php?want=sponsor` ticks sponsorship
 - `signup.php?want=sponsor&tier=premier` ticks sponsorship and that tier (any key in `$sponsor_tiers`)
 
@@ -105,7 +105,7 @@ $signup['itflow_url']    = 'https://billing.example.com';
 $signup['itflow_secret'] = 'the secret shown there';
 ```
 
-Linked, the prices, technicians and regions come from ITFlow (its Hosted ITFlow products and its servers) instead of `$hosting`, and the tier prices from its sponsorship products instead of `$sponsor_tiers` - kept for 10 minutes, so they are set in one place. The tiers' keys here (`supporter`, `company`, `premier`) must be the add-on's. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
+Linked, the prices, agents and regions come from ITFlow (its Hosted ITFlow products and its servers) instead of `$hosting`, and the tier prices from its sponsorship products instead of `$sponsor_tiers` - kept for 10 minutes, so they are set in one place. The tiers' keys here (`supporter`, `company`, `premier`) must be the add-on's. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
 
 **Paying sponsors show by themselves.** Sponsors who aren't anonymous are added while they pay, by their tier - Premier Sponsors' large logos, Sponsors' logos, Supporters' names - after the sponsors in `$sponsors`; a name already there isn't shown twice. (When ITFlow doesn't say which tier, a featured sponsor shows as a Premier Sponsor and the rest in the Sponsor tier.) Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
 
@@ -128,7 +128,7 @@ $signup['ticket_templates'] = ['hosting' => 12, 'sponsor' => 13];
 Each sign-up then:
 
 - **Makes the company a lead**, with its address and its primary, billing and technical contacts - or, when the primary contact's email is already a contact there, goes on that client.
-- **Opens a ticket for each thing asked for** - hosted ITFlow, a sponsorship - raised from its template: its category, its tasks (the steps from confirming it to handing it over, the ones for their answers), who it goes to and its priority, with the template's fill-ins answered from the form (Hostname, Technicians, Region, Tier...). The canned responses for its category are offered on it, filled in from those answers.
+- **Opens a ticket for each thing asked for** - hosted ITFlow, a sponsorship - raised from its template: its category, its tasks (the steps from confirming it to handing it over, the ones for their answers), who it goes to and its priority, with the template's fill-ins answered from the form (Hostname, Agents, Region, Tier...). The canned responses for its category are offered on it, filled in from those answers.
 - **Puts their own note** from the form on each ticket as an internal note, so it isn't sent back out by email.
 
 ITFlow tells people as it does for any new ticket: the contact gets its Ticket Created email (when ticket emails to clients are on) and replies to it to add anything, and the new-ticket address and the template's agent hear about it - unless it is invoiced (below). The thank-you page says what happens next and links to each ticket. A copy still goes to `$signup['notify_to']` with the ticket numbers in its subject - set `$signup['ticket_email'] = false` once ITFlow's own notices are enough.
@@ -143,10 +143,10 @@ Map the ITFlow products each thing is billed with, and each sign-up is invoiced 
 $signup['itflow_products'] = ['hosting' => 23, 'seat' => 24, 'supporter' => 25, 'company' => 26, 'premier' => 27];
 ```
 
-`hosting` is the instance with its included technicians, `seat` each technician past those, and one for each tier in `$sponsor_tiers` by its key. Then each sign-up also:
+`hosting` is the instance with its included agents, `seat` each agent past those, and one for each tier in `$sponsor_tiers` by its key. Then each sign-up also:
 
 - **Invites** the primary contact - and the billing contact, when that's someone else - to the client portal, where they find their invoices, can save a card for the months ahead, and follow their requests.
-- **Makes a monthly recurring invoice** for each thing asked for, from its products - the technicians past those included as a second line, a Premier Sponsor's chosen amount as its price - and **its first invoice straight away**, emailed to them.
+- **Makes a monthly recurring invoice** for each thing asked for, from its products - the agents past those included as a second line, a Premier Sponsor's chosen amount as its price - and **its first invoice straight away**, emailed to them.
 - **Ties each ticket to its first invoice, On Hold.** Only your team hears about the ticket; the customer has the invoice's email and the portal invite.
 - Ends on a thank-you page with a **Pay** button for each invoice.
 

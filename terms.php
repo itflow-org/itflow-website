@@ -13,7 +13,7 @@ $terms = [
     'operator'     => 'ITFlow',                                        // who "we" are - the business that bills hosting and sponsorships
     'email'        => 'sales@itflow.org',                              // where to write to us about any of this
     'law'          => 'the Commonwealth of Pennsylvania, United States', // whose laws these terms are under
-    'updated'      => '2026-10-31',                                    // when these terms last changed, YYYY-MM-DD
+    'updated'      => '2026-11-23',                                    // when these terms last changed, YYYY-MM-DD
     'suspend_days' => 14,   // an invoice this many days overdue suspends hosting, and takes sponsor perks off
     'remove_days'  => 30,   // a hosted ITFlow and its backups are removed this many days after it ends
     'notice_days'  => 30,   // notice we give before a price change, a change to these terms, or ending hosting
@@ -62,7 +62,7 @@ require __DIR__ . '/includes/header.php';
     <h3>What you get</h3>
     <ul>
         <li>Your own ITFlow instance, not a shared one, in the region you choose, at your own domain or a name on <?= e($hosting['app_domain'] ?? 'itflow.app') ?>.</li>
-        <li>As many technicians as you pay for. You can change the number at any time, and your price changes with it.</li>
+        <li>As many agents as you pay for - everyone on your team who signs in to ITFlow, whatever their role; clients and their portal contacts don't count. You can change the number at any time, and your price changes with it.</li>
         <li>Nightly backups.</li>
         <li>Updates applied for you: security fixes straight away, other releases shortly after they come out.</li>
         <li>Help with your hosted ITFlow from the ITFlow team.</li>

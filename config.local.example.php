@@ -104,9 +104,9 @@ $signup['itflow_api_key'] = '';
 // ITFlow's Hosted ITFlow products and its servers.
 // ===========================================================================
 
-// $hosting['base_price']       = 60;                    // monthly, with 'included_seats' technicians
+// $hosting['base_price']       = 60;                    // monthly, with 'included_seats' agents
 // $hosting['included_seats']   = 2;
-// $hosting['seat_price']       = 25;                    // monthly, per technician above 'included_seats'
+// $hosting['seat_price']       = 25;                    // monthly, per agent above 'included_seats'
 // $hosting['max_seats']        = 500;
 // $hosting['regions']          = ['us-east02' => 'US East (us-east02)'];
 // $hosting['app_domain']       = 'itflow.app';          // their address when they don't bring a domain: name.itflow.app

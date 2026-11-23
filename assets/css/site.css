@@ -606,7 +606,7 @@ a.sponsor-chip:hover, a.sponsor-chip:focus-visible { border-color: var(--signal)
 .input:disabled { opacity: .55; }
 .was-validated .input:invalid, .was-validated .select:invalid, .was-validated .textarea:invalid { border-color: var(--danger); }
 .input-sm { min-height: 38px; padding: 6px 12px; font-size: .95rem; }
-/* No up/down arrows in number boxes - the technicians box has its own - and +; the arrow keys still work */
+/* No up/down arrows in number boxes - the agents box has its own - and +; the arrow keys still work */
 .input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .input[type="number"]::-webkit-inner-spin-button,
 .input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

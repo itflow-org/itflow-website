@@ -20,7 +20,7 @@
         },
         {
             "name": "Hosting: Confirm the details",
-            "body": "<p>Hi [First Name],</p><p>Thanks for signing up for hosted ITFlow. Before we set it up, here is what we have:</p><ul><li>Address: <strong>[Hostname]</strong></li><li>Technicians: [Technicians]</li><li>Region: [Region]</li><li>Each month: [Monthly]</li></ul><p>[What to check]</p><p>Just reply here - and if anything needs changing, more technicians or a different address, tell us before you pay and we'll send a new invoice.</p>",
+            "body": "<p>Hi [First Name],</p><p>Thanks for signing up for hosted ITFlow. Before we set it up, here is what we have:</p><ul><li>Address: <strong>[Hostname]</strong></li><li>Agents: [Agents]</li><li>Region: [Region]</li><li>Each month: [Monthly]</li></ul><p>[What to check]</p><p>Just reply here - and if anything needs changing, more agents or a different address, tell us before you pay and we'll send a new invoice.</p>",
             "categories": [
                 {
                     "name": "Onboard Hosting",
@@ -80,7 +80,7 @@
         },
         {
             "name": "Hosting: Your ITFlow is ready",
-            "body": "<p>Hi [First Name],</p><p>Your ITFlow is ready at <strong>https://[Hostname]</strong>.</p><p><strong>1. Accept your invite.</strong> Open this link, choose your password and sign in - it works for 7 days:<br />[Invite link]</p><p><strong>2. Connect your mail.</strong> In <strong>Admin &gt; Mail</strong>, set up sending - and receiving, for email to tickets - with your own mail server, Microsoft 365 or Google. ITFlow sends nothing until you do: no invites, no ticket emails, no invoices. The steps are at https://docs.itflow.org/admin/mail</p><p><strong>3. Invite your team.</strong> In <strong>Admin &gt; Users</strong>, New User. You have [Technicians] technician seats - clients and their portal contacts are free.</p><p>We keep it up to date and back it up every night. Anything you need, just reply here.</p>",
+            "body": "<p>Hi [First Name],</p><p>Your ITFlow is ready at <strong>https://[Hostname]</strong>.</p><p><strong>1. Accept your invite.</strong> Open this link, choose your password and sign in - it works for 7 days:<br />[Invite link]</p><p><strong>2. Connect your mail.</strong> In <strong>Admin &gt; Mail</strong>, set up sending - and receiving, for email to tickets - with your own mail server, Microsoft 365 or Google. ITFlow sends nothing until you do: no invites, no ticket emails, no invoices. The steps are at https://docs.itflow.org/admin/mail</p><p><strong>3. Invite your team.</strong> In <strong>Admin &gt; Users</strong>, New User. You have [Agents] agent seats - clients and their portal contacts are free.</p><p>We keep it up to date and back it up every night. Anything you need, just reply here.</p>",
             "categories": [
                 {
                     "name": "Onboard Hosting",

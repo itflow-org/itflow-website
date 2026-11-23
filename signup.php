@@ -235,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($want_hosting) {
         $seats = (int) field('seats');
         if ($seats < $included_seats || $seats > $max_seats) {
-            $errors[] = "Technicians must be between $included_seats and $max_seats.";
+            $errors[] = "Agents must be between $included_seats and $max_seats.";
         }
         $hosting_total = $base_price + max(0, $seats - $included_seats) * $seat_price;
 
@@ -440,7 +440,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Read by us and, in ITFlow's Ticket Created email, by them - so neither "you" nor "they"
                     'Address' => $hostname . ($access === 'own' ? ' (own domain - needs a DNS record)' : " (on $app_domain)"),
                     'Region' => $regions[$region],
-                    'Technicians' => "$seats ($included_seats included" . ($extra ? ", $extra more" : '') . ')',
+                    'Agents' => "$seats ($included_seats included" . ($extra ? ", $extra more" : '') . ')',
                     'Each month' => money($hosting_total),
                     'Time zone' => $timezone . ($timezone_from === 'their browser' ? '' : ' (the default - the browser did not say)'),
                 ] + $contact_rows),
@@ -448,12 +448,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'Hostname' => $hostname,
                     'Address' => $access === 'own' ? 'Their own domain' : 'Our domain',
                     'Region' => $region,
-                    'Technicians' => (string) $seats,
+                    'Agents' => (string) $seats,
                     'Monthly' => money($hosting_total),
                     'Time zone' => $timezone,
                 ],
             ];
-            // Billed from its products: the instance, and each technician past those included
+            // Billed from its products: the instance, and each agent past those included
             if (itflowProductId('hosting') && (!$extra || itflowProductId('seat'))) {
                 $tickets['hosting']['scope'] = "Hosted ITFlow - $hostname";
                 $tickets['hosting']['items'] = [['product_id' => itflowProductId('hosting'), 'qty' => 1, 'tax_id' => 'default']];
@@ -516,7 +516,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $monthly = $hosting_total + $sponsor_total;
         $parts = [];
         if ($want_hosting) {
-            $parts[] = "Hosted instance ($seats technicians)";
+            $parts[] = "Hosted instance ($seats agents)";
         }
         if ($want_sponsor) {
             $parts[] = 'Sponsorship';
@@ -529,7 +529,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($want_hosting) {
             $body .= "HOSTED INSTANCE\n";
-            $body .= "  Technicians:  $seats ($included_seats included, " . max(0, $seats - $included_seats) . " additional)\n";
+            $body .= "  Agents:       $seats ($included_seats included, " . max(0, $seats - $included_seats) . " additional)\n";
             $body .= "  Price:        $" . number_format($hosting_total, 2) . "/month\n";
             $body .= "  Region:       {$regions[$region]}\n";
             $body .= "  Hostname:     $hostname " . ($access === 'own' ? '(their own domain - needs DNS)' : "($app_domain)") . "\n";
@@ -594,7 +594,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $body .= "IP address: " . ($_SERVER['REMOTE_ADDR'] ?? '?') . "\n";
 
-        $subject = 'Sign-up: ' . $company . ($want_hosting ? " - $seats technicians" : '') . ($want_sponsor ? ' - sponsor' : '')
+        $subject = 'Sign-up: ' . $company . ($want_hosting ? " - $seats agents" : '') . ($want_sponsor ? ' - sponsor' : '')
             . ($opened ? ' [' . implode(', ', array_column($opened, 'reference')) . ']' : '');
 
         require_once __DIR__ . '/includes/mailer.php';
@@ -615,7 +615,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $outcome = $in_itflow ? 'into ITFlow' . ($opened ? ' as tickets ' . implode(', ', array_column($opened, 'reference')) : '') : 'emailed';
     }
-    $asked = array_filter([$want_hosting ? "hosting, $seats technicians" : '', $want_sponsor ? 'sponsor' . ($tier_key !== '' ? " ($tier_key)" : '') : '']);
+    $asked = array_filter([$want_hosting ? "hosting, $seats agents" : '', $want_sponsor ? 'sponsor' . ($tier_key !== '' ? " ($tier_key)" : '') : '']);
     signupLog($outcome, ($asked ? implode(' + ', $asked) : 'nothing chosen') . ' | ' . line('company') . ' <' . line('primary_email') . '>');
 }
 
@@ -823,7 +823,7 @@ $step = 0;
                     <label class="choice">
                         <input type="checkbox" name="want_hosting" value="1" <?= checked('want_hosting', '1', $default_hosting) ?>>
                         <strong>Hosted ITFlow</strong>
-                        <small>Your own ITFlow, kept up to date and backed up nightly. <?= money($base_price) ?> a month with <?= (int) $included_seats ?> technicians.</small>
+                        <small>Your own ITFlow, kept up to date and backed up nightly. <?= money($base_price) ?> a month with <?= (int) $included_seats ?> agents.</small>
                     </label>
                     <label class="choice">
                         <input type="checkbox" name="want_sponsor" value="1" <?= checked('want_sponsor', '1', $default_sponsor) ?>>
@@ -845,13 +845,13 @@ $step = 0;
                 <h2 class="panel-title"><span class="tour-num" data-num="hosting"><?= ++$step ?></span>Your instance</h2>
                 <div class="fields">
                     <div class="span-6">
-                        <label class="label" for="seats">Technicians <span class="req" aria-hidden="true">*</span></label>
+                        <label class="label" for="seats">Agents <span class="req" aria-hidden="true">*</span></label>
                         <div class="input-group stepper">
                             <button type="button" data-step="-1" aria-label="One fewer">&minus;</button>
                             <input type="number" class="input" id="seats" name="seats" min="<?= (int) $included_seats ?>" max="<?= (int) $max_seats ?>" value="<?= old('seats', $default_seats) ?>" required>
                             <button type="button" data-step="1" aria-label="One more">+</button>
                         </div>
-                        <p class="hint"><?= (int) $included_seats ?> included, then <?= money($seat_price) ?> a month each. Clients and their portal contacts are free.</p>
+                        <p class="hint">Everyone on your team who signs in to ITFlow, whatever their role. <?= (int) $included_seats ?> included, then <?= money($seat_price) ?> a month each. Clients and their portal contacts are free.</p>
                     </div>
                     <div class="span-6">
                         <label class="label" for="region">Region <span class="req" aria-hidden="true">*</span></label>
@@ -1200,9 +1200,9 @@ $step = 0;
         if (hosting) {
             var seats = Math.max(INCLUDED, parseInt($('#seats').value, 10) || INCLUDED);
             var extra = seats - INCLUDED;
-            lines.appendChild(row('Hosted ITFlow, ' + INCLUDED + ' technicians', BASE));
+            lines.appendChild(row('Hosted ITFlow, ' + INCLUDED + ' agents', BASE));
             if (extra > 0) {
-                lines.appendChild(row(extra + ' more technician' + (extra > 1 ? 's' : '') + ' at ' + money(SEAT), extra * SEAT));
+                lines.appendChild(row(extra + ' more agent' + (extra > 1 ? 's' : '') + ' at ' + money(SEAT), extra * SEAT));
             }
             total += BASE + extra * SEAT;
         }

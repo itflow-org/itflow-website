@@ -7,7 +7,7 @@
             "name": "Hosted ITFlow - new instance",
             "description": "A hosted ITFlow sign-up from itflow.org, from its first invoice being paid to handing it over. The website raises it On Hold, waiting on that invoice, with the fill-ins answered.",
             "subject": "Hosted ITFlow: [Client] - [Hostname]",
-            "details": "<p>Hosted ITFlow for [Client] at <strong>[Hostname]</strong> - [Technicians] technicians in [Region], [Monthly] a month. Time zone [Time zone].</p>",
+            "details": "<p>Hosted ITFlow for [Client] at <strong>[Hostname]</strong> - [Agents] agents in [Region], [Monthly] a month. Time zone [Time zone].</p>",
             "category": {
                 "name": "Onboard Hosting",
                 "color": "#0d6efd",
@@ -86,7 +86,7 @@
                     "when": null
                 },
                 {
-                    "name": "Managed Instances: add it for [Client] - [Technicians] seats, automatic updates - and paste its code into Admin > Managed By there",
+                    "name": "Managed Instances: add it for [Client] - [Agents] seats, automatic updates - and paste its code into Admin > Managed By there",
                     "estimate": 5,
                     "when": null
                 },
@@ -145,7 +145,7 @@
                     "help": "The server it goes on - us-east02"
                 },
                 {
-                    "name": "Technicians",
+                    "name": "Agents",
                     "type": "text",
                     "options": [],
                     "required": false,

@@ -79,13 +79,13 @@ $hero = [
         ['label' => 'Get started',  'href' => '#start',                  'style' => 'secondary'],
     ],
     // The line under the buttons; {price}, {included} and {seat} come from $hosting. Hidden when hosting is off.
-    'hosting_line' => 'Or let us run it: hosted ITFlow from {price} a month, {included} technicians included.',
+    'hosting_line' => 'Or let us run it: hosted ITFlow from {price} a month, {included} agents included.',
     'shot'    => 'dashboard',
     'shot_alt' => 'The ITFlow dashboard: tickets past their SLA, overdue invoices, expiring domains and certificates, and the day\'s schedule',
     'facts'   => [
         ['icon' => 'fas fa-code-branch',        'text' => 'Free and open source'],
         ['icon' => 'fas fa-server',             'text' => 'Your server or ours'],
-        ['icon' => 'fas fa-user-check',         'text' => 'No per-technician fees to self-host'],
+        ['icon' => 'fas fa-user-check',         'text' => 'No per-agent fees to self-host'],
         ['icon' => 'fas fa-screwdriver-wrench', 'text' => 'Built by people who run MSPs'],
     ],
 ];
@@ -168,14 +168,14 @@ $start = [
     'self'    => [
         'title'  => 'Host it yourself',
         'price'  => 'Free',
-        'text'   => 'Install it on any Linux server with PHP and MariaDB, or run the Docker image. Every feature, as many technicians as you like.',
+        'text'   => 'Install it on any Linux server with PHP and MariaDB, or run the Docker image. Every feature, as many agents as you like.',
         'items'  => ['All of ITFlow, no paid tier', 'Your data stays on your server', 'Help from the community forum'],
         'button' => 'Install ITFlow',
         'docker' => 'Docker image',   // a link to $site['docker_url']; '' for none
     ],
     'hosted'  => [
         'title'  => 'Hosted ITFlow',
-        'note'   => '{included} technicians included, then {seat} a month for each one after that.',
+        'note'   => '{included} agents included, then {seat} a month for each one after that.',
         'text'   => 'Your own ITFlow, run by the people who build it. We keep it updated and backed up.',
         'items'  => ['Nightly backups', 'Updates applied for you, security fixes straight away', 'Your own domain, or a free itflow.app address', 'Unlimited clients and portal contacts', 'Help from the ITFlow team'],
         'button' => 'Get hosted ITFlow',
@@ -316,9 +316,9 @@ $footer = [
 // Hosting prices and regions (used by the homepage and the sign-up form)
 // ---------------------------------------------------------------------------
 $hosting = [
-    'base_price'     => 60,  // monthly, includes 'included_seats' technicians (agent users)
+    'base_price'     => 60,  // monthly, includes 'included_seats' agents (active agent users, whatever their role)
     'included_seats' => 2,
-    'seat_price'     => 25,  // monthly, per technician above 'included_seats'
+    'seat_price'     => 25,  // monthly, per agent above 'included_seats'
     'max_seats'      => 500,
     'regions'        => [
         'us-east02' => 'US East (us-east02)',
@@ -390,7 +390,7 @@ $signup = [
     // Still email notify_to a copy of each sign-up that went in as a ticket
     'ticket_email' => true,
     // Bill them there too - the ITFlow products each is invoiced with (their ids, from Sales > Products): 'hosting' the
-    // instance with its included technicians, 'seat' each technician more, and one per tier in $sponsor_tiers. Set, a
+    // instance with its included agents, 'seat' each agent more, and one per tier in $sponsor_tiers. Set, a
     // sign-up gets a client portal invite and a monthly recurring invoice whose first invoice is emailed straight away,
     // with a Pay button here; its ticket waits On Hold until that is paid. The prices shown then come from the products.
     // The key's role needs Modify on Sales as well. 0: not billed - the ticket only.
