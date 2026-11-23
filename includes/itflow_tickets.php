@@ -2,7 +2,7 @@
 /*
  * itflow.org - sign-ups as tickets in our ITFlow, through its API. With
  * $signup['itflow_url'] and $signup['itflow_api_key'] set (config.local.php),
- * a sign-up the Hosting add-on isn't taking becomes:
+ * each sign-up becomes:
  *
  *   - the company as a lead, with its address and contacts - or, when the
  *     primary contact's email is already a contact there, that client

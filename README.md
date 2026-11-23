@@ -17,12 +17,12 @@ Everything you'd change lives in **`config.php`**, top to bottom in page order:
 | "Everything an MSP runs on" - the feature cards (icon, title, a sentence or two each) | `$features` |
 | "ITFlow in action" - the six steps and their screenshots | `$tour` |
 | "Get started" - host it yourself, hosted ITFlow, the demo | `$start` |
-| Sponsors, longest-standing first: `'tier'` is how each shows - `'premier'` (Premier Sponsor) a large tile with their logo, `'company'` (Sponsor) a smaller logo tile (logo files go in `assets/img/sponsors/`), no tier (a Supporter) their name; `'since' => 'YYYY-MM'` when each started | `$sponsors`. Linked to ITFlow, paying sponsors are added by themselves |
+| Sponsors, longest-standing first: `'tier'` is how each shows - `'premier'` (Premier Sponsor) a large tile with their logo, `'company'` (Sponsor) a smaller logo tile (logo files go in `assets/img/sponsors/`), no tier (a Supporter) their name; `'since' => 'YYYY-MM'` when each started | `$sponsors` |
 | Sponsors section text, the three headings, the anonymous sponsors' line (`'anonymous'`) and the "Your logo here" tile (`'join'`) | `$sponsors_section` |
 | About timeline | `$timeline` (oldest first) |
 | Core team | `$team` (photos go in `assets/img/team/`) |
 | Footer text, social buttons, link columns | `$footer` |
-| Hosting prices, regions and the fallback time zone | `$hosting` |
+| Hosting prices, regions, the itflow.app domain and the fallback time zone | `$hosting` |
 | Sponsorship tiers: name, price, icon, perks, the tier each one builds on, how its sponsors show on itflow.org (`'show'` - `'name'`, `'logo'` or `'large'`) and `'whitelabel'` for a white-label key | `$sponsor_tiers` |
 | Sign-up recipients and required fields | `$signup` |
 | Mail server | `$mail` |
@@ -90,30 +90,9 @@ It writes both widths into `assets/img/shots/` and trims the scrollbar off the e
 
 `assets/img/og.png` is the picture shown when a link to the site is shared (1200 x 630). It mentions the $60 price, so make it again if that changes, or if the headline does: `tools/og.html` is its source - open it on the site in a 1200 x 630 browser window and save a screenshot over `og.png`.
 
-## Sign-ups straight into ITFlow
-
-Link the form to the billing ITFlow's Hosting add-on and sign-ups need nobody:
-
-- **Hosted ITFlow** - the client, the recurring invoice and the first invoice are made there, and the customer goes straight to a Pay button. Their ITFlow is built as soon as that invoice is paid, and they get an email with a link to set their password.
-- **Sponsorships** - the same: a recurring invoice for the tier and the first invoice with its Pay button. Once it is paid, the sponsor is emailed their white-label key (on a tier with one), and staff get a to-do for the forum hearts. Anonymous sponsors and every forum username go along with it.
-- **Both together** - one client, an invoice each, and a Pay button each.
-
-Put the two lines from Hosting > Settings in that ITFlow into `config.local.php`:
-
-```php
-$signup['itflow_url']    = 'https://billing.example.com';
-$signup['itflow_secret'] = 'the secret shown there';
-```
-
-Linked, the prices, agents and regions come from ITFlow (its Hosted ITFlow products and its servers) instead of `$hosting`, and the tier prices from its sponsorship products instead of `$sponsor_tiers` - kept for 10 minutes, so they are set in one place. The tiers' keys here (`supporter`, `company`, `premier`) must be the add-on's. The itflow.app name is checked as it is typed. Each request to ITFlow is signed with the secret.
-
-**Paying sponsors show by themselves.** Sponsors who aren't anonymous are added while they pay, by their tier - Premier Sponsors' large logos, Sponsors' logos, Supporters' names - after the sponsors in `$sponsors`; a name already there isn't shown twice. (When ITFlow doesn't say which tier, a featured sponsor shows as a Premier Sponsor and the rest in the Sponsor tier.) Their name, link and logo are set on their sponsor page in ITFlow; the page here picks them up within 10 minutes, and drops them the same way if an invoice goes overdue. Logos come inside ITFlow's answer as pictures, so nothing here loads from ITFlow.
-
-If ITFlow can't be reached, or isn't taking sign-ups or sponsorships, the form emails the request like before - marked "NOT created" so someone adds it by hand - so no sign-up is lost.
-
 ## Sign-ups as tickets in ITFlow
 
-Without the add-on, the form can still put each sign-up into our ITFlow - as a ticket to work through, through ITFlow's API. In that ITFlow:
+The form can put each sign-up into our ITFlow - as a ticket to work through, through ITFlow's API. Without it, every sign-up is emailed (see Mail). In that ITFlow:
 
 1. Make a role with **Modify** on **Clients** and on **Support**, an agent with that role for the website, and an API key for that agent in Admin > API Keys.
 2. Import `tools/itflow-onboarding-ticket-templates.json` in Admin > Ticket Templates and `tools/itflow-onboarding-canned-responses.json` in Admin > Canned Responses. They bring the **Onboard Hosting** and **Onboard Sponsor** ticket categories with them. Set who each template goes to - a file doesn't carry that.
@@ -133,7 +112,7 @@ Each sign-up then:
 
 ITFlow tells people as it does for any new ticket: the contact gets its Ticket Created email (when ticket emails to clients are on) and replies to it to add anything, and the new-ticket address and the template's agent hear about it - unless it is invoiced (below). The thank-you page says what happens next and links to each ticket. A copy still goes to `$signup['notify_to']` with the ticket numbers in its subject - set `$signup['ticket_email'] = false` once ITFlow's own notices are enough.
 
-With no template set (`0`), the ticket is a plain one with the sign-up in it. Whatever can't be opened or invoiced - ITFlow down, a wrong key, template or product - is emailed as before, saying what went wrong, so no sign-up is lost. The same form sent twice opens nothing more: what a sign-up opened is kept for a day in the system's temp folder. When both the add-on and a key are set, the add-on takes what it can and the rest become tickets.
+With no template set (`0`), the ticket is a plain one with the sign-up in it. Whatever can't be opened or invoiced - ITFlow down, a wrong key, template or product - is emailed as before, saying what went wrong, so no sign-up is lost. The same form sent twice opens nothing more: what a sign-up opened is kept for a day in the system's temp folder.
 
 ### Invoiced as they sign up
 
@@ -165,15 +144,14 @@ Every form sent is a line in `$signup['log_file']` - by default `signups.log` in
 
 ## Secrets
 
-Keep the real form secret and mail password out of git, in `config.local.php` next to `config.php` - `.gitignore` already excludes it. Copy `config.local.example.php` to start it: the secrets are at the top, and below them, commented out, every setting a server usually changes - the mail server, who gets sign-ups and the fields they need, the section switches, the site's own address (for a staging copy) and the hosting prices used while the form isn't linked to ITFlow. config.php reads it last, so anything set there wins, on that server only.
+Keep the real form secret and mail password out of git, in `config.local.php` next to `config.php` - `.gitignore` already excludes it. Copy `config.local.example.php` to start it: the secrets are at the top, and below them, commented out, every setting a server usually changes - the mail server, who gets sign-ups and the fields they need, the section switches, the site's own address (for a staging copy) and the hosting prices used while no ITFlow products are set. config.php reads it last, so anything set there wins, on that server only.
 
 ```php
 <?php
 $signup['form_secret']   = 'a-long-random-string';          // required - openssl rand -hex 32
 $mail['password']        = 'smtp-password';
-$signup['itflow_url']    = 'https://billing.example.com';   // optional - see "Sign-ups straight into ITFlow"
-$signup['itflow_secret'] = 'from Hosting > Settings';
-$signup['itflow_api_key'] = 'from Admin > API Keys';        // or this - see "Sign-ups as tickets in ITFlow"
+$signup['itflow_url']     = 'https://billing.example.com';  // optional - see "Sign-ups as tickets in ITFlow"
+$signup['itflow_api_key'] = 'from Admin > API Keys';
 ```
 
 The form secret has to be set: config.php's own is public, so with it the bot check keeps nobody out.
@@ -219,7 +197,6 @@ require __DIR__ . '/includes/footer.php';
 | `includes/header.php`, `includes/footer.php` | The top and bottom of every page |
 | `includes/home/*.php` | Each homepage section |
 | `includes/mailer.php` | Sending mail with PHPMailer |
-| `includes/itflow_link.php` | The link to the billing ITFlow's Hosting add-on: signed requests, its prices, regions and tier prices, and the paying sponsors |
 | `includes/itflow_tickets.php` | Sign-ups as tickets in ITFlow through its API: the lead and its contacts, a ticket for each from its template, the note |
 | `assets/css/site.css` | All the styles, light and dark |
 | `assets/js/site.js` | The phone menu and "ITFlow in action" |

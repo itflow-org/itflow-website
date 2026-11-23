@@ -23,15 +23,10 @@ $signup['form_secret'] = 'replace-with-a-long-random-string';
 // The password for the mail server below (the SMTP username's password)
 $mail['password'] = '';
 
-// Our billing ITFlow's address - for the Hosting add-on or for tickets below
-$signup['itflow_url']    = '';   // e.g. 'https://billing.pittpc.com'
-
-// Sign-ups straight into its Hosting add-on - from Hosting > Settings there
-$signup['itflow_secret'] = '';
-
-// Or sign-ups as tickets there: an API key from Admin > API Keys, for a user
-// whose role has Modify on Clients and on Support. Left empty (and no add-on),
-// every sign-up is emailed instead.
+// Sign-ups as tickets in our ITFlow: its address, and an API key from
+// Admin > API Keys for a user whose role has Modify on Clients and on Support.
+// Left empty, every sign-up is emailed instead.
+$signup['itflow_url']     = '';   // e.g. 'https://billing.pittpc.com'
 $signup['itflow_api_key'] = '';
 
 // The ticket templates the tickets are raised from - their ids, from
@@ -100,8 +95,8 @@ $signup['itflow_api_key'] = '';
 
 // ===========================================================================
 // Hosting prices and regions
-// Only used while the form isn't linked to ITFlow - linked, they come from
-// ITFlow's Hosted ITFlow products and its servers.
+// The prices are only used while no ITFlow products are set in
+// $signup['itflow_products'] - set, they come from those products.
 // ===========================================================================
 
 // $hosting['base_price']       = 60;                    // monthly, with 'included_seats' agents

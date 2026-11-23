@@ -323,6 +323,7 @@ $hosting = [
     'regions'        => [
         'us-east02' => 'US East (us-east02)',
     ],
+    'app_domain'     => 'itflow.app',  // their address when they don't bring a domain: name.itflow.app
     // A new ITFlow is set up in the customer's time zone, which the sign-up form takes from
     // their browser. This one is used when the browser doesn't say. They can change it in ITFlow.
     'default_timezone' => 'America/New_York',
@@ -331,13 +332,12 @@ $hosting = [
 // ---------------------------------------------------------------------------
 // Sponsorship tiers - monthly. 'custom' => true lets them name an amount >= price.
 // 'includes' names the tier whose perks this one also gets ("Everything in the X tier, plus").
-// The keys are what links and the Hosting add-on use, so they stay put when a tier is renamed.
+// The keys are what links and the ITFlow products in $signup['itflow_products'] use, so they stay put when a tier is renamed.
 // 'icon' is a Font Awesome class, shown in the circle at the top of the tier's card.
 // 'show' is how the tier's sponsors appear on itflow.org - 'name', 'logo' or 'large'.
 // 'whitelabel' => true: the tier (and every tier that includes it) gets a white-label key.
 // Any tier's sponsor can choose to stay anonymous - not shown on itflow.org at all.
-// Linked to ITFlow, the keys must match the Hosting add-on's tiers - its prices are used,
-// and it sends paying sponsors to the homepage by itself.
+// With its product set in $signup['itflow_products'], a tier's price comes from ITFlow.
 // ---------------------------------------------------------------------------
 $sponsor_tiers = [
     'supporter' => [
@@ -376,13 +376,10 @@ $sponsor_tiers = [
 $signup = [
     'notify_to'   => ['sales@itflow.org'],                  // who receives sign-ups (one or more)
     'form_secret' => 'CHANGE-ME-to-a-long-random-string',   // set the real one in config.local.php
-    // Hosted sign-ups straight into the billing ITFlow's Hosting add-on - set both in config.local.php
-    // (copy them from Hosting > Settings). Its prices and regions then replace $hosting's above.
-    'itflow_url'    => '',
-    'itflow_secret' => '',
-    // Or sign-ups as tickets in that ITFlow, through its API: the company as a lead with its contacts,
-    // and a ticket for each thing asked for. Set the key in config.local.php - from Admin > API Keys,
-    // for a user whose role has Modify on Clients and on Support.
+    // Sign-ups as tickets in our ITFlow, through its API: the company as a lead with its contacts, and a
+    // ticket for each thing asked for. Set both in config.local.php - the key from Admin > API Keys, for a
+    // user whose role has Modify on Clients and on Support. Empty: every sign-up is emailed instead.
+    'itflow_url'     => '',
     'itflow_api_key' => '',
     // The ticket template each ticket is raised from (its id, from Admin > Ticket Templates): its
     // category, tasks, agent and priority, with its fill-ins answered from the form. 0: a plain ticket.

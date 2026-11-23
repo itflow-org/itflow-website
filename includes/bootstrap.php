@@ -7,15 +7,10 @@
 define('ITFLOW_SITE', true);
 
 require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/itflow_link.php';
 require_once __DIR__ . '/itflow_tickets.php';
 
-// Prices, regions, the app domain and the paying sponsors from our billing ITFlow when the sign-up form is linked to it
-$hosting = itflowHostingInfo($hosting);
-$sponsor_tiers = itflowSponsorTiers($sponsor_tiers);
-// ...or from its products, when sign-ups become tickets and invoices there (includes/itflow_tickets.php)
+// Prices from our ITFlow's products, when sign-ups become tickets and invoices there (includes/itflow_tickets.php)
 itflowApplyProductPrices($hosting, $sponsor_tiers);
-$sponsors = itflowSponsors($sponsors);
 
 /* Text made safe for HTML. */
 function e($value) {
@@ -108,13 +103,8 @@ function sponsorShow(array $sponsor) {
  * null when the picture's size can't be read - the stylesheet's limits apply then.
  */
 function sponsorLogoSize($src, $show = 'large') {
-    $src = (string) $src;
-    if (strncmp($src, 'data:', 5) === 0) {
-        $bytes = (string) base64_decode(substr($src, strpos($src, ',') + 1));
-    } else {
-        $file = __DIR__ . '/../' . ltrim($src, '/');
-        $bytes = is_file($file) ? (string) file_get_contents($file) : '';
-    }
+    $file = __DIR__ . '/../' . ltrim((string) $src, '/');
+    $bytes = is_file($file) ? (string) file_get_contents($file) : '';
     $size = $bytes !== '' ? @getimagesizefromstring($bytes) : false;
     if (!$size && preg_match('/<svg\b[^>]*>/i', $bytes, $tag)) {
         if (preg_match('/\bwidth="([\d.]+)(px)?"/', $tag[0], $w) && preg_match('/\bheight="([\d.]+)(px)?"/', $tag[0], $h)) {
@@ -135,18 +125,17 @@ function sponsorLogoSize($src, $show = 'large') {
 }
 
 /*
- * A sponsor's tile on the homepage - their logo (a file here, or the picture ITFlow
- * sent), or their name until it's here, and when they started - linking to their
- * website. $show is 'large' or 'logo'.
+ * A sponsor's tile on the homepage - their logo, or their name until its file is
+ * here, and when they started - linking to their website. $show is 'large' or 'logo'.
  */
 function sponsorTileHtml(array $sponsor, $show) {
-    $logo = !empty($sponsor['logo_data']) ? $sponsor['logo_data'] : (siteFileExists($sponsor['logo'] ?? '') ? asset($sponsor['logo']) : '');
+    $logo = siteFileExists($sponsor['logo'] ?? '') ? asset($sponsor['logo']) : '';
     $tag = !empty($sponsor['url']) ? 'a' : 'span';
     $since = sponsorSince($sponsor['since'] ?? '');
     $html = '<li class="sponsor' . ($logo !== '' ? ' sponsor-has-logo' : '') . '">'
         . "<$tag class=\"sponsor-tile\"" . ($tag === 'a' ? ' href="' . e($sponsor['url']) . '" target="_blank" rel="noopener" title="' . e($sponsor['name']) . '"' : '') . '>';
     if ($logo !== '') {
-        $size = sponsorLogoSize(!empty($sponsor['logo_data']) ? $sponsor['logo_data'] : $sponsor['logo'], $show);
+        $size = sponsorLogoSize($sponsor['logo'], $show);
         $html .= '<img class="sponsor-logo" src="' . e($logo) . '" alt="' . e($sponsor['name']) . '"'
             . ($size ? ' width="' . $size[0] . '" height="' . $size[1] . '"' : '') . ' loading="lazy" decoding="async">';
     } else {

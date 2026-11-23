@@ -7,8 +7,7 @@
  * (sponsorLogoSize()); a tile shows the name until its logo is here. The last
  * premier tile invites the next one: to the sign-up form while it is open, else
  * to its 'url'. Then the tiers ($sponsor_tiers, when sponsorship is on and the
- * sign-up page is open). Linked to ITFlow, the paying sponsors are added by
- * themselves (itflowSponsors()).
+ * sign-up page is open).
  */
 defined('ITFLOW_SITE') || exit;
 $show_wall = sectionOn('sponsors') && $sponsors;

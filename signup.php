@@ -2,18 +2,16 @@
 /*
  * itflow.org - Hosted ITFlow / Sponsorship sign-up
  *
- * Shows the form, validates it, and sends it on. A hosted sign-up and a
- * sponsorship go straight into our billing ITFlow when the form is linked to
- * its Hosting add-on (includes/itflow_link.php): the customer gets a first
- * invoice for each with a Pay button, and their ITFlow is built - or their
- * sponsorship starts, with its tier's perks - as soon as it is paid. With an
- * API key instead (includes/itflow_tickets.php), each becomes a ticket there,
- * raised from its onboarding template, on the company made a lead. What
- * isn't in ITFlow is emailed with PHPMailer. Nothing is stored here but what
- * a sign-up opened, for a day, so it isn't opened twice, and a line in the
- * sign-up log ($signup['log_file']) for each form sent. Prices, tiers, required
- * fields, mail settings and the on/off switches live in config.php (prices
- * and regions come from ITFlow when linked).
+ * Shows the form, validates it, and sends it on. With an API key for our
+ * ITFlow (includes/itflow_tickets.php), each thing asked for becomes a ticket
+ * there, raised from its onboarding template, on the company made a lead -
+ * and, with its products set, a recurring invoice whose first invoice is
+ * emailed at once, the ticket waiting On Hold until it is paid. Without a key,
+ * or for whatever ITFlow couldn't take, the sign-up is emailed with PHPMailer.
+ * Nothing is stored here but what a sign-up opened, for a day, so it isn't
+ * opened twice, and a line in the sign-up log ($signup['log_file']) for each
+ * form sent. Prices, tiers, required fields, mail settings and the on/off
+ * switches live in config.php (prices come from ITFlow's products when set).
  *
  * Links from the homepage can preselect: signup.php?want=hosting
  * or signup.php?want=sponsor&tier=premier
@@ -54,14 +52,9 @@ $seat_price     = $hosting['seat_price'];
 $max_seats      = $hosting['max_seats'];
 $regions        = $hosting['regions'];
 $app_domain     = $hosting['app_domain'];
-// Hosted sign-ups and sponsorships go into ITFlow when linked and it is taking them; otherwise they are emailed
-$linked         = $offer_hosting && itflowLinked() && !empty($hosting['open']);
-$linked_sponsor = $offer_sponsor && itflowLinked() && itflowSponsorOpen();
-// ...or invoiced as they go into ITFlow as tickets, from its products (includes/itflow_tickets.php)
-$bill_hosting   = $offer_hosting && !$linked && itflowProductId('hosting') > 0;
-$bill_sponsor   = $offer_sponsor && !$linked_sponsor && (bool) array_filter(array_map('itflowProductId', array_keys($sponsor_tiers)));
-$invoice_hosting = $linked || $bill_hosting;
-$invoice_sponsor = $linked_sponsor || $bill_sponsor;
+// Invoiced as they go into ITFlow as tickets, when its products are set (includes/itflow_tickets.php)
+$invoice_hosting = $offer_hosting && itflowProductId('hosting') > 0;
+$invoice_sponsor = $offer_sponsor && (bool) array_filter(array_map('itflowProductId', array_keys($sponsor_tiers)));
 $sponsor_names  = sponsorNamesShort($sponsors);
 $notify_to      = (array) $signup['notify_to'];
 
@@ -171,30 +164,11 @@ $default_tier    = isset($sponsor_tiers[$tier_param]) ? $tier_param : '';
 $default_seats   = isset($_GET['seats']) && ctype_digit((string) $_GET['seats']) ? min($max_seats, max($included_seats, (int) $_GET['seats'])) : $included_seats;
 
 // ---------------------------------------------------------------------------
-// Is a name free? Asked by the form as someone types (signup.php?check=1&subdomain=acme)
-// ---------------------------------------------------------------------------
-if (isset($_GET['check'])) {
-    header('Content-Type: application/json');
-    header('Cache-Control: no-store');
-    if (!$linked) {
-        echo json_encode(['ok' => null]);
-        exit;
-    }
-    $ask = isset($_GET['hostname']) ? ['check' => true, 'hostname' => strtolower(substr((string) $_GET['hostname'], 0, 253))]
-        : ['check' => true, 'subdomain' => strtolower(substr((string) ($_GET['subdomain'] ?? ''), 0, 63))];
-    $answer = itflowAsk($ask, $status, 5);
-    echo json_encode($status === 200 && is_array($answer) ? ['ok' => (bool) $answer['ok'], 'error' => (string) ($answer['error'] ?? '')] : ['ok' => null]);
-    exit;
-}
-
-// ---------------------------------------------------------------------------
 // Handle a submission
 // ---------------------------------------------------------------------------
 $errors = [];
 $sent = false;
-$created = null;          // ITFlow's answer to a hosted sign-up: address, invoice and its Pay link
-$created_sponsor = null;  // ...and to a sponsorship: tier, invoice and its Pay link
-$ticketed = null;         // ...or, as tickets: itflowSignupTickets()'s answer
+$ticketed = null;         // itflowSignupTickets()'s answer, when sign-ups go into ITFlow
 $opened = [];             // the tickets opened - [hosting|sponsor => reference, url]
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -359,65 +333,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "That didn't go through. Everything you typed is still here - press the button again to send it.";
     }
 
-    // Into ITFlow - the client, and for each of hosting and the sponsorship its recurring invoice
-    // and first invoice. Whatever ITFlow isn't taking (or when it can't be reached) is emailed below.
-    $itflow_hosting = $want_hosting && $linked;
-    $itflow_sponsor = $want_sponsor && $linked_sponsor;
-    if (!$errors && ($itflow_hosting || $itflow_sponsor)) {
-        $person = function ($key) {
-            return ['name' => line($key . '_name'), 'email' => line($key . '_email'), 'phone' => line($key . '_phone'), 'title' => line($key . '_title'), 'mobile' => line($key . '_mobile')];
-        };
-        $primary = $person('primary');
-        $ask = [
-            // The same form sent twice is one sign-up
-            'ref' => substr(hash('sha256', $ts . '|' . $sig . '|' . strtolower($primary_email)), 0, 40),
-            'hosting' => $itflow_hosting,
-            'company' => ['name' => $company, 'address' => line('address'), 'city' => line('city'), 'state' => line('state'), 'postal' => line('postal', 20),
-                'country' => line('country'), 'phone' => line('primary_phone'), 'website' => $sponsor_url],
-            'contacts' => [
-                'primary' => $primary,
-                'billing' => isset($_POST['billing_same']) ? $primary : $person('billing'),
-                'technical' => isset($_POST['technical_same']) ? $primary : $person('technical'),
-            ],
-            'comments' => mb_substr(field('comments'), 0, 5000),
-        ];
-        if ($itflow_hosting) {
-            $ask += [
-                'region' => $region,
-                'seats' => $seats,
-                'access' => $access,
-                'subdomain' => $access === 'itflowapp' ? strtolower(line('app_subdomain', 63)) : '',
-                'hostname' => $access === 'own' ? $hostname : '',
-                'timezone' => $timezone,
-            ];
-        }
-        if ($itflow_sponsor) {
-            $ask['sponsor'] = [
-                'tier' => $tier_key,
-                'amount' => $sponsor_total,
-                'anonymous' => $sponsor_anonymous ? 1 : 0,
-                'display_name' => $sponsor_display,
-                'url' => $sponsor_url,
-                'forum_users' => $forum_users,
-                'forum_user' => $forum_users[0] ?? '',  // the first, for an add-on that takes one
-            ];
-        }
-        $answer = itflowAsk($ask, $status);
-        if ($status === 200 && !empty($answer['ok'])) {
-            $created = $itflow_hosting ? $answer : null;
-            $created_sponsor = $itflow_sponsor && is_array($answer['sponsor'] ?? null) ? $answer['sponsor'] : null;
-            // Done, unless part of it still has to go by email
-            $sent = !($want_hosting && !$created) && !($want_sponsor && !$created_sponsor);
-        } elseif ($status === 422 && is_array($answer) && !empty($answer['error'])) {
-            $errors[] = $answer['error'];
-        }
-        // Couldn't reach ITFlow - emailed below like before, so the sign-up isn't lost
-    }
-
-    // Into ITFlow as tickets - what the add-on isn't taking: the company as a lead with its contacts,
-    // and a ticket for each thing asked for, from its template (includes/itflow_tickets.php)
-    $ticket_hosting = $want_hosting && !$created && itflowTicketsOn();
-    $ticket_sponsor = $want_sponsor && !$created_sponsor && itflowTicketsOn();
+    // Into ITFlow as tickets: the company as a lead with its contacts, and a ticket for each thing
+    // asked for, from its template (includes/itflow_tickets.php)
+    $ticket_hosting = $want_hosting && itflowTicketsOn();
+    $ticket_sponsor = $want_sponsor && itflowTicketsOn();
     if (!$errors && ($ticket_hosting || $ticket_sponsor)) {
         $person = function ($key) {
             return ['name' => line($key . '_name'), 'email' => line($key . '_email'), 'phone' => line($key . '_phone'), 'title' => line($key . '_title'), 'mobile' => line($key . '_mobile')];
@@ -507,9 +426,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         $opened = $ticketed['tickets'];
     }
-    // Everything asked for is in ITFlow - with a Pay button from the add-on, or as a ticket
-    $in_itflow = !$errors && ($created || $created_sponsor || $opened)
-        && (!$want_hosting || $created || isset($opened['hosting'])) && (!$want_sponsor || $created_sponsor || isset($opened['sponsor']));
+    // Everything asked for is in ITFlow as a ticket
+    $in_itflow = !$errors && $opened && (!$want_hosting || isset($opened['hosting'])) && (!$want_sponsor || isset($opened['sponsor']));
 
     // Send - what isn't in ITFlow, and a copy of what went in as a ticket while $signup['ticket_email'] is on
     if (!$errors && (!$in_itflow || ($opened && !empty($signup['ticket_email'])))) {
@@ -534,12 +452,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $body .= "  Region:       {$regions[$region]}\n";
             $body .= "  Hostname:     $hostname " . ($access === 'own' ? '(their own domain - needs DNS)' : "($app_domain)") . "\n";
             $body .= "  Time zone:    $timezone ($timezone_from)\n";
-            $body .= $created
-                ? "  In ITFlow:    signed up as {$created['address']}, invoice {$created['invoice']['number']} sent - built once it is paid\n\n"
-                : (isset($opened['hosting']) ? "  In ITFlow:    ticket {$opened['hosting']['reference']} opened" . ($ticketed['client_made'] ? ', with the company as a new lead' : ' on their client') . "\n"
+            $body .= isset($opened['hosting']) ? "  In ITFlow:    ticket {$opened['hosting']['reference']} opened" . ($ticketed['client_made'] ? ', with the company as a new lead' : ' on their client') . "\n"
                     . itflowInvoiceLine($ticketed, 'hosting') . "\n"
-                : ($ticket_hosting ? "  In ITFlow:    NO ticket - " . ($ticketed['errors']['hosting'] ?? $ticketed['errors']['client'] ?? 'not opened') . ". Open it by hand.\n\n"
-                : ($linked ? "  In ITFlow:    NOT created - ITFlow could not be reached. Add it by hand.\n\n" : "\n")));
+                : ($ticket_hosting ? "  In ITFlow:    NO ticket - " . ($ticketed['errors']['hosting'] ?? $ticketed['errors']['client'] ?? 'not opened') . ". Open it by hand.\n\n" : "\n");
         }
         if ($want_sponsor) {
             $body .= "SPONSORSHIP\n";
@@ -552,12 +467,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $body .= "  Website:      " . ($sponsor_url ?: '-') . "\n";
             }
             $body .= "  Forum users:  " . ($forum_users ? implode(', ', $forum_users) : '-') . "\n";
-            $body .= $created_sponsor
-                ? "  In ITFlow:    signed up, invoice {$created_sponsor['invoice']['number']} sent - starts once it is paid\n\n"
-                : (isset($opened['sponsor']) ? "  In ITFlow:    ticket {$opened['sponsor']['reference']} opened" . ($ticketed['client_made'] ? ', with the company as a new lead' : ' on their client') . "\n"
+            $body .= isset($opened['sponsor']) ? "  In ITFlow:    ticket {$opened['sponsor']['reference']} opened" . ($ticketed['client_made'] ? ', with the company as a new lead' : ' on their client') . "\n"
                     . itflowInvoiceLine($ticketed, 'sponsor') . "\n"
-                : ($ticket_sponsor ? "  In ITFlow:    NO ticket - " . ($ticketed['errors']['sponsor'] ?? $ticketed['errors']['client'] ?? 'not opened') . ". Open it by hand.\n\n"
-                : ($linked_sponsor ? "  In ITFlow:    NOT created - ITFlow could not be reached. Add it by hand.\n\n" : "\n")));
+                : ($ticket_sponsor ? "  In ITFlow:    NO ticket - " . ($ticketed['errors']['sponsor'] ?? $ticketed['errors']['client'] ?? 'not opened') . ". Open it by hand.\n\n" : "\n");
         }
 
         $body .= "COMPANY\n";
@@ -625,45 +537,19 @@ $sig = hash_hmac('sha256', (string) $ts, $signup['form_secret']);
 // The heading follows what's on offer
 if ($offer_hosting && $offer_sponsor) {
     $page_heading = 'Hosted ITFlow and sponsorship';
-    $page_lede = $linked
-        ? 'Sign up for your own hosted ITFlow, sponsor the project, or both. Hosted ITFlow is ready a few minutes after you pay your first invoice.'
-        : ($bill_hosting ? 'Sign up for your own hosted ITFlow, sponsor the project, or both. Your first invoice comes straight away, and we get started as soon as it is paid.'
-        : 'Sign up for your own hosted ITFlow, sponsor the project, or both. Nothing is charged until we have confirmed everything with you.');
+    $page_lede = $invoice_hosting
+        ? 'Sign up for your own hosted ITFlow, sponsor the project, or both. Your first invoice comes straight away, and we get started as soon as it is paid.'
+        : 'Sign up for your own hosted ITFlow, sponsor the project, or both. Nothing is charged until we have confirmed everything with you.';
 } elseif ($offer_hosting) {
     $page_heading = 'Hosted ITFlow';
-    $page_lede = $linked
-        ? 'Your own ITFlow, run, updated and backed up by the people who build it. Ready a few minutes after you pay your first invoice.'
-        : ($bill_hosting ? 'Your own ITFlow, run, updated and backed up by the people who build it. Your first invoice comes straight away, and we set it up as soon as it is paid.'
-        : 'Your own ITFlow, run, updated and backed up by the people who build it. Nothing is charged until we have confirmed everything with you.');
+    $page_lede = $invoice_hosting
+        ? 'Your own ITFlow, run, updated and backed up by the people who build it. Your first invoice comes straight away, and we set it up as soon as it is paid.'
+        : 'Your own ITFlow, run, updated and backed up by the people who build it. Nothing is charged until we have confirmed everything with you.';
 } else {
     $page_heading = 'Sponsor ITFlow';
     $page_lede = $invoice_sponsor
         ? 'Help keep ITFlow free and open source. Your sponsorship starts as soon as you pay your first invoice.'
         : 'Help keep ITFlow free and open source. Nothing is charged until we have confirmed everything with you.';
-}
-
-// What ITFlow made, to pay now - one Pay button each
-$to_pay = [];
-if ($created && !empty($created['invoice']['pay_url'])) {
-    $to_pay[] = ['what' => 'Hosted ITFlow', 'detail' => $created['address'] ?? '', 'icon' => 'fas fa-cloud', 'invoice' => $created['invoice']];
-}
-if ($created_sponsor && !empty($created_sponsor['invoice']['pay_url'])) {
-    $to_pay[] = ['what' => 'Sponsorship', 'detail' => $created_sponsor['tier_name'] ?? '', 'icon' => 'fas fa-hand-holding-heart', 'invoice' => $created_sponsor['invoice']];
-}
-// What a new sponsorship brings once its invoice is paid, for the thank-you
-$sponsor_starts = [];
-if ($created_sponsor) {
-    $created_tier = isset($sponsor_tiers[$created_sponsor['tier'] ?? '']) ? $created_sponsor['tier'] : $tier_key;
-    $created_show = sponsorShow(['tier' => $created_tier]);
-    if (tierHas($created_tier, 'whitelabel', $sponsor_tiers)) {
-        $sponsor_starts[] = 'we email <strong>' . e($primary_email) . '</strong> your white-label key';
-    }
-    if (!$sponsor_anonymous && $created_show === 'name') {
-        $sponsor_starts[] = 'your name goes up on itflow.org';
-    }
-    if ($forum_users) {
-        $sponsor_starts[] = 'the heart goes next to ' . e(listNames($forum_users)) . ' on the forum';
-    }
 }
 
 $page_title = $page_heading . ' - ITFlow';
@@ -675,45 +561,13 @@ $step = 0;
 ?>
 
 <section class="wrap page-head">
-    <h1><?= e($created || !empty($ticketed['invoices']['hosting']) ? 'Thanks for signing up' : ($created_sponsor || !empty($ticketed['invoices']['sponsor']) ? 'Thanks for sponsoring ITFlow' : ($sent ? 'Thanks, we have it' : $page_heading))) ?></h1>
-    <?php if (!$sent && !$created && !$created_sponsor) { ?><p><?= e($page_lede) ?></p><?php } ?>
+    <h1><?= e(!empty($ticketed['invoices']['hosting']) ? 'Thanks for signing up' : (!empty($ticketed['invoices']['sponsor']) ? 'Thanks for sponsoring ITFlow' : ($sent ? 'Thanks, we have it' : $page_heading))) ?></h1>
+    <?php if (!$sent) { ?><p><?= e($page_lede) ?></p><?php } ?>
 </section>
 
 <section class="wrap signup">
 
-<?php if ($created || $created_sponsor) { ?>
-    <div class="done">
-        <span class="done-mark"><i class="fas fa-check" aria-hidden="true"></i></span>
-        <h2><?= count($to_pay) > 1 ? 'One step left: pay your first invoices' : 'One step left: pay your first invoice' ?></h2>
-        <?php if ($created) { ?>
-            <p>Your ITFlow will be at <strong><?= e($created['app_address'] ?? $created['address'] ?? '') ?></strong>. As soon as invoice <?= e($created['invoice']['number'] ?? '') ?> is paid we build it - usually within a few minutes - and email <strong><?= e($primary_email) ?></strong> a link to set your password.</p>
-            <?php if (($created['address'] ?? '') !== ($created['app_address'] ?? '')) { ?>
-                <p>To use <strong><?= e($created['address']) ?></strong>, we'll email you the DNS record to add once it's built, and switch you over as soon as it's in.</p>
-            <?php } ?>
-        <?php } ?>
-        <?php if ($created_sponsor) { ?>
-            <p>Your sponsorship starts as soon as invoice <?= e($created_sponsor['invoice']['number'] ?? '') ?> is paid<?= $sponsor_starts ? ': ' . listNames($sponsor_starts) : '' ?>.<?= !$sponsor_anonymous && $created_show !== 'name' ? ' Reply to our email with your logo and we put it up on itflow.org.' : '' ?></p>
-        <?php } ?>
-
-        <?php if (count($to_pay) === 1) { ?>
-            <a class="button button-primary" href="<?= e($to_pay[0]['invoice']['pay_url']) ?>">Pay <?= e(money($to_pay[0]['invoice']['amount'] ?? 0)) ?> now</a>
-        <?php } elseif ($to_pay) { ?>
-            <ul class="pay-list">
-                <?php foreach ($to_pay as $pay) { ?>
-                    <li class="pay-item">
-                        <span class="pay-icon" aria-hidden="true"><i class="<?= $pay['icon'] ?>"></i></span>
-                        <span class="pay-what">
-                            <strong><?= e($pay['what']) ?></strong>
-                            <small><?= e($pay['detail']) ?> &middot; invoice <?= e($pay['invoice']['number'] ?? '') ?></small>
-                        </span>
-                        <a class="button button-primary button-small" href="<?= e($pay['invoice']['pay_url']) ?>">Pay <?= e(money($pay['invoice']['amount'] ?? 0)) ?></a>
-                    </li>
-                <?php } ?>
-            </ul>
-        <?php } ?>
-        <p class="hint" style="margin-top: 14px"><?= count($to_pay) > 1 ? 'Both invoices are' : 'The invoice is' ?> in your email too<?= $want_sponsor && !$created_sponsor ? ", and we'll be in touch about your sponsorship" : '' ?><?= $want_hosting && !$created ? ", and we'll be in touch about your hosted ITFlow" : '' ?>.</p>
-    </div>
-<?php } elseif ($sent && $opened) {
+<?php if ($sent && $opened) {
     // Opened as tickets in ITFlow - billed or not - what happens next, and a Pay button or a link for each
     $billed = array_intersect_key((array) ($ticketed['invoices'] ?? []), $opened);
     $paid_when = function ($kind) use ($billed, $opened) {
@@ -871,15 +725,14 @@ $step = 0;
                                 <strong>An <?= e($app_domain) ?> address</strong>
                                 <small>Ready straight away, no DNS changes.</small>
                                 <span class="input-group" data-access="itflowapp">
-                                    <input type="text" class="input input-sm" name="app_subdomain" placeholder="yourcompany" value="<?= old('app_subdomain') ?>" maxlength="63" pattern="[A-Za-z0-9]([A-Za-z0-9\-]{1,61}[A-Za-z0-9])?" title="Letters, numbers and dashes, 3-63 characters" autocapitalize="off" spellcheck="false" required aria-label="Your <?= e($app_domain) ?> name" data-check="subdomain">
+                                    <input type="text" class="input input-sm" name="app_subdomain" placeholder="yourcompany" value="<?= old('app_subdomain') ?>" maxlength="63" pattern="[A-Za-z0-9]([A-Za-z0-9\-]{1,61}[A-Za-z0-9])?" title="Letters, numbers and dashes, 3-63 characters" autocapitalize="off" spellcheck="false" required aria-label="Your <?= e($app_domain) ?> name">
                                     <span class="input-addon">.<?= e($app_domain) ?></span>
                                 </span>
-                                <span class="hint name-check" data-access="itflowapp" id="nameCheck" aria-live="polite"></span>
                             </label>
                             <label class="choice">
                                 <input type="radio" name="access" value="own" required <?= checked('access', 'own') ?>>
                                 <strong>Your own domain</strong>
-                                <small><?= $linked ? "You start on $app_domain; we email you the DNS record to add and switch you over once it's in." : "We'll send you the DNS record to add before we go live." ?></small>
+                                <small>We'll send you the DNS record to add before we go live.</small>
                                 <input type="text" class="input input-sm" data-access="own" name="own_hostname" placeholder="itflow.yourcompany.com" value="<?= old('own_hostname') ?>" maxlength="253" pattern="([A-Za-z0-9]([A-Za-z0-9\-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}" title="A hostname such as itflow.yourcompany.com" autocapitalize="off" spellcheck="false" required aria-label="Your hostname">
                             </label>
                         </div>
@@ -1042,13 +895,13 @@ $step = 0;
                 $ticked_hosting = $_SERVER['REQUEST_METHOD'] === 'POST' ? isset($_POST['want_hosting']) : $default_hosting;
                 $ticked_sponsor = $_SERVER['REQUEST_METHOD'] === 'POST' ? isset($_POST['want_sponsor']) : $default_sponsor;
                 $note = $ticked_hosting && $ticked_sponsor ? 'both' : ($ticked_sponsor ? 'sponsor' : 'hosting'); ?>
-                <p class="summary-note" data-linked-note data-note="hosting"<?= $note === 'hosting' ? '' : ' hidden' ?>>Hosted ITFlow: your first invoice comes next, and your ITFlow is built as soon as it is paid.</p>
-                <p class="summary-note" data-linked-note data-note="sponsor"<?= $note === 'sponsor' ? '' : ' hidden' ?>>Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
-                <p class="summary-note" data-linked-note data-note="both"<?= $note === 'both' ? '' : ' hidden' ?>>A first invoice for each comes next. Your ITFlow is built, and your sponsorship starts, as soon as each is paid.</p>
+                <p class="summary-note" data-note="hosting"<?= $note === 'hosting' ? '' : ' hidden' ?>>Hosted ITFlow: your first invoice comes next, and we set up your ITFlow as soon as it is paid.</p>
+                <p class="summary-note" data-note="sponsor"<?= $note === 'sponsor' ? '' : ' hidden' ?>>Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
+                <p class="summary-note" data-note="both"<?= $note === 'both' ? '' : ' hidden' ?>>A first invoice for each comes next. We set up your ITFlow, and your sponsorship starts, as soon as each is paid.</p>
             <?php } elseif ($invoice_hosting) { ?>
-                <p class="summary-note" data-linked-note>Hosted ITFlow: your first invoice comes next, and your ITFlow is built as soon as it is paid.</p>
+                <p class="summary-note">Hosted ITFlow: your first invoice comes next, and we set up your ITFlow as soon as it is paid.</p>
             <?php } elseif ($invoice_sponsor) { ?>
-                <p class="summary-note" data-linked-note>Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
+                <p class="summary-note">Sponsorship: your first invoice comes next, and your sponsorship starts as soon as it is paid.</p>
             <?php } else { ?>
                 <p class="summary-note">Nothing is charged now. We'll confirm everything with you and send your first invoice.</p>
             <?php } ?>
@@ -1236,36 +1089,6 @@ $step = 0;
             }
         }
     });
-
-    // Is the name free? Asked of ITFlow as they type, when the form is linked to it
-    var nameInput = $('[data-check=subdomain]');
-    var nameCheck = document.getElementById('nameCheck');
-    var nameTimer = null;
-    if (nameInput && nameCheck && <?= $linked ? 'true' : 'false' ?>) {
-        nameInput.addEventListener('input', function () {
-            clearTimeout(nameTimer);
-            nameInput.setCustomValidity('');
-            nameCheck.textContent = '';
-            nameCheck.className = 'hint name-check';
-            var value = nameInput.value.trim().toLowerCase();
-            if (value.length < 3) {
-                return;
-            }
-            nameTimer = setTimeout(function () {
-                fetch('signup.php?check=1&subdomain=' + encodeURIComponent(value), { headers: { 'Accept': 'application/json' } })
-                    .then(function (r) { return r.json(); })
-                    .then(function (a) {
-                        if (nameInput.value.trim().toLowerCase() !== value || a.ok === null) {
-                            return;
-                        }
-                        nameCheck.textContent = a.ok ? value + '.<?= e($app_domain) ?> is free' : a.error;
-                        nameCheck.className = 'hint name-check ' + (a.ok ? 'is-free' : 'is-taken');
-                        nameInput.setCustomValidity(a.ok ? '' : a.error);
-                    })
-                    .catch(function () {});
-            }, 400);
-        });
-    }
 
     form.addEventListener('input', update);
     form.addEventListener('change', update);

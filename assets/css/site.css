@@ -652,9 +652,6 @@ a.sponsor-chip:hover, a.sponsor-chip:focus-visible { border-color: var(--signal)
 @media (min-width: 1100px) { .tier-choices { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .sponsor-anonymous-choice { margin-top: 16px; }
 .feedback { display: none; margin-top: 10px; color: var(--danger); font-size: .94rem; }
-.name-check { display: block; min-height: 1.2em; }
-.name-check.is-free { color: #198754; }
-.name-check.is-taken { color: var(--danger); }
 .was-validated .feedback.is-shown { display: block; }
 
 .sponsor-intro { display: flex; gap: 16px; align-items: flex-start; padding: 16px 18px; margin-bottom: 20px; border-radius: 10px; background: var(--surface-2); }
